@@ -23,18 +23,12 @@ export default function LoginScreen() {
 
   const handleLogin = () => {
     if (!email.trim()) {
-      Alert.alert(
-        'Missing Information',
-        'Please enter your email address.'
-      );
+      Alert.alert('Missing Information', 'Please enter your email address.');
       return;
     }
 
     if (!password) {
-      Alert.alert(
-        'Missing Information',
-        'Please enter your password.'
-      );
+      Alert.alert('Missing Information', 'Please enter your password.');
       return;
     }
 
@@ -60,7 +54,6 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.content}>
-
             {/* ALKHIDMAT LOGO */}
             <Image
               source={require('../../assets/images/alkhidmat-logo.png')}
@@ -69,20 +62,12 @@ export default function LoginScreen() {
             />
 
             {/* WELCOME */}
-            <Text style={styles.welcome}>
-              Welcome Back
-            </Text>
-
-            <Text style={styles.subtitle}>
-              Sign in to continue volunteering.
-            </Text>
+            <Text style={styles.welcome}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to continue volunteering.</Text>
 
             {/* EMAIL */}
             <View style={styles.field}>
-              <Text style={styles.label}>
-                Email Address
-              </Text>
-
+              <Text style={styles.label}>Email Address</Text>
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
@@ -97,9 +82,7 @@ export default function LoginScreen() {
 
             {/* PASSWORD */}
             <View style={styles.field}>
-              <Text style={styles.label}>
-                Password
-              </Text>
+              <Text style={styles.label}>Password</Text>
 
               <View style={styles.passWrap}>
                 <TextInput
@@ -114,9 +97,8 @@ export default function LoginScreen() {
                 />
 
                 <TouchableOpacity
-                  onPress={() =>
-                    setShowPass((previous) => !previous)
-                  }
+                  style={styles.toggleButton}
+                  onPress={() => setShowPass((previous) => !previous)}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.toggle}>
@@ -132,9 +114,7 @@ export default function LoginScreen() {
               onPress={handleForgotPassword}
               activeOpacity={0.7}
             >
-              <Text style={styles.forgotText}>
-                Forgot password?
-              </Text>
+              <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
 
             {/* SIGN IN */}
@@ -143,37 +123,24 @@ export default function LoginScreen() {
               onPress={handleLogin}
               activeOpacity={0.8}
             >
-              <Text style={styles.buttonText}>
-                Sign In
-              </Text>
+              <Text style={styles.buttonText}>Sign In</Text>
             </TouchableOpacity>
 
             {/* SIGN UP */}
             <View style={styles.signupRow}>
-              <Text style={styles.signupText}>
-                Don't have an account?{' '}
-              </Text>
-
+              <Text style={styles.signupText}>Don't have an account? </Text>
               <TouchableOpacity
                 onPress={() => router.push('/signup')}
                 activeOpacity={0.7}
               >
-                <Text style={styles.signupLink}>
-                  Sign Up
-                </Text>
+                <Text style={styles.signupLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
 
             {/* BACK TO WELCOME */}
-            <TouchableOpacity
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.backText}>
-                Back to Welcome
-              </Text>
+            <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+              <Text style={styles.backText}>Back to Welcome</Text>
             </TouchableOpacity>
-
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -186,53 +153,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#071A3A',
   },
-
   keyboardView: {
     flex: 1,
   },
-
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
   },
-
   content: {
     alignItems: 'center',
     paddingHorizontal: 30,
     paddingVertical: 40,
+    width: '100%',
+    maxWidth: 460,
+    alignSelf: 'center',
   },
-
   logo: {
     width: 190,
     height: 110,
     marginBottom: 15,
   },
-
   welcome: {
     fontSize: 28,
     fontWeight: '800',
     color: '#FFFFFF',
     marginBottom: 10,
   },
-
   subtitle: {
     fontSize: 15,
     color: '#A9B8DD',
     textAlign: 'center',
     marginBottom: 30,
   },
-
   field: {
     width: '100%',
     marginBottom: 16,
   },
-
   label: {
     fontSize: 12,
     color: '#A9B8DD',
     marginBottom: 6,
   },
-
   input: {
     width: '100%',
     height: 52,
@@ -245,6 +206,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
+  // ===== FIXED: password field no longer lets the
+  // Show/Hide button spill outside the rounded corners =====
   passWrap: {
     width: '100%',
     height: 52,
@@ -252,19 +215,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
     backgroundColor: 'rgba(255,255,255,0.05)',
-    paddingHorizontal: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    overflow: 'hidden', // <- clips children to the rounded border
   },
-
   passInput: {
     flex: 1,
     height: '100%',
     color: '#FFFFFF',
     fontSize: 14,
+    paddingLeft: 14,
+    paddingRight: 8,
   },
-
+  toggleButton: {
+    height: '100%',
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   toggle: {
     color: '#A9B8DD',
     fontSize: 12,
@@ -276,13 +244,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginBottom: 24,
   },
-
   forgotText: {
     color: '#E8C56A',
     fontSize: 13,
     fontWeight: '600',
   },
-
   button: {
     width: '100%',
     height: 55,
@@ -291,29 +257,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   buttonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700',
   },
-
   signupRow: {
     flexDirection: 'row',
     marginTop: 22,
   },
-
   signupText: {
     color: '#A9B8DD',
     fontSize: 13,
   },
-
   signupLink: {
     color: '#E8C56A',
     fontSize: 13,
     fontWeight: '700',
   },
-
   backText: {
     color: '#6F80AB',
     fontSize: 13,

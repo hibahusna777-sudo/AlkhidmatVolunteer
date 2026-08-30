@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -18,7 +17,59 @@ export default function HomeScreen() {
   const openScan = () => router.push("/scan");
   const openCertificates = () => router.push("/certificates");
   const openAssistant = () => router.push("/assistant");
-  const openHackathon = () => router.push("/event-hackathon");
+  const openBanoQabil = () => router.push("/bano-qabil");
+  const openHackathonEvent = () => router.push("/event-hackathon");
+
+  const quickAccessItems = [
+    {
+      key: "nearby",
+      label: "Nearby\nOpportunities",
+      icon: "location-outline" as const,
+      onPress: openNearby,
+      tint: "#EAF0FF",
+      iconColor: "#2F6BFF",
+    },
+    {
+      key: "my-events",
+      label: "My Events",
+      icon: "calendar-outline" as const,
+      onPress: openMyEvents,
+      tint: "#F3EAFF",
+      iconColor: "#8B5CF6",
+    },
+    {
+      key: "scan",
+      label: "Scan QR\nAttendance",
+      icon: "qr-code-outline" as const,
+      onPress: openScan,
+      tint: "#FFF1E6",
+      iconColor: "#F97316",
+    },
+    {
+      key: "certificates",
+      label: "Certificates",
+      icon: "document-text-outline" as const,
+      onPress: openCertificates,
+      tint: "#E8FBF0",
+      iconColor: "#22C55E",
+    },
+    {
+      key: "assistant",
+      label: "AI Assistant",
+      icon: "sparkles-outline" as const,
+      onPress: openAssistant,
+      tint: "#FDEAF6",
+      iconColor: "#EC4899",
+    },
+    {
+      key: "hackathon",
+      label: "Hackathon\nEvent",
+      icon: "trophy-outline" as const,
+      onPress: openHackathonEvent,
+      tint: "#FFF7E0",
+      iconColor: "#D4A017",
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,16 +85,23 @@ export default function HomeScreen() {
               <Text style={styles.welcome}>Welcome back!</Text>
             </View>
 
-            <View style={styles.avatar}>
-              <Image
-                source={require("../../assets/images/alkhidmat-logo.png")}
-                style={styles.logo}
-                resizeMode="contain"
-              />
+            <View style={styles.headerRight}>
+              <TouchableOpacity style={styles.bellButton} activeOpacity={0.7}>
+                <Ionicons name="notifications-outline" size={20} color="#334155" />
+                <View style={styles.bellDot} />
+              </TouchableOpacity>
+
+              <View style={styles.avatar}>
+                <Image
+                  source={require("../../assets/images/alkhidmat-logo.png")}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
           </View>
 
-          {/* BANNER */}
+          {/* BANNER — original image untouched, now points to Bano Qabil */}
           <View style={styles.banner}>
             <Image
               source={require("../../assets/images/home-banner.jpg")}
@@ -52,6 +110,11 @@ export default function HomeScreen() {
             />
 
             <View style={styles.bannerOverlay}>
+              <View style={styles.bannerBadge}>
+                <Ionicons name="heart" size={11} color="#FFFFFF" />
+                <Text style={styles.bannerBadgeText}>Volunteer Program</Text>
+              </View>
+
               <Text style={styles.bannerTitle}>Make an Impact</Text>
               <Text style={styles.bannerSubtitle}>
                 Join hands for a better tomorrow
@@ -59,7 +122,7 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.exploreButton}
-                onPress={openHackathon}
+                onPress={openBanoQabil}
                 activeOpacity={0.85}
               >
                 <Text style={styles.exploreText}>Explore Events</Text>
@@ -69,50 +132,24 @@ export default function HomeScreen() {
           </View>
 
           {/* QUICK ACCESS */}
-          <Text style={styles.sectionTitle}>Quick Access</Text>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Quick Access</Text>
+          </View>
 
           <View style={styles.grid}>
-            <TouchableOpacity style={styles.card} onPress={openNearby} activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="location-outline" size={23} color="#2F6BFF" />
-              </View>
-              <Text style={styles.cardText}>Nearby{"\n"}Opportunities</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.card} onPress={openMyEvents} activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="calendar-outline" size={23} color="#2F6BFF" />
-              </View>
-              <Text style={styles.cardText}>My Events</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.card} onPress={openScan} activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="qr-code-outline" size={23} color="#2F6BFF" />
-              </View>
-              <Text style={styles.cardText}>Scan QR{"\n"}Attendance</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.card} onPress={openCertificates} activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="document-text-outline" size={23} color="#2F6BFF" />
-              </View>
-              <Text style={styles.cardText}>Certificates</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.card} onPress={openAssistant} activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="sparkles-outline" size={23} color="#2F6BFF" />
-              </View>
-              <Text style={styles.cardText}>AI Assistant</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.card} onPress={openHackathon} activeOpacity={0.8}>
-              <View style={styles.iconCircle}>
-                <Ionicons name="trophy-outline" size={23} color="#2F6BFF" />
-              </View>
-              <Text style={styles.cardText}>Hackathon{"\n"}Event</Text>
-            </TouchableOpacity>
+            {quickAccessItems.map((item) => (
+              <TouchableOpacity
+                key={item.key}
+                style={styles.card}
+                onPress={item.onPress}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.iconCircle, { backgroundColor: item.tint }]}>
+                  <Ionicons name={item.icon} size={22} color={item.iconColor} />
+                </View>
+                <Text style={styles.cardText}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -139,12 +176,11 @@ const styles = StyleSheet.create({
   },
 
   /* HEADER */
-
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 22,
   },
 
   greeting: {
@@ -154,15 +190,44 @@ const styles = StyleSheet.create({
   },
 
   welcome: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "800",
     color: "#071A3A",
   },
 
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  bellButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E5EAF3",
+  },
+
+  bellDot: {
+    position: "absolute",
+    top: 10,
+    right: 11,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: "#EF4444",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+  },
+
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -171,19 +236,23 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
   },
 
   /* BANNER */
-
   banner: {
     width: "100%",
-    height: 175,
-    borderRadius: 18,
+    height: 195,
+    borderRadius: 22,
     overflow: "hidden",
-    marginBottom: 25,
-    backgroundColor: "#DCE6FF",
+    marginBottom: 28,
+    backgroundColor: "#0B2A5B",
+    shadowColor: "#0B2A5B",
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6,
   },
 
   bannerImage: {
@@ -195,12 +264,31 @@ const styles = StyleSheet.create({
   bannerOverlay: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "rgba(7, 26, 58, 0.55)",
+    paddingHorizontal: 22,
+    backgroundColor: "rgba(6, 20, 46, 0.6)",
+  },
+
+  bannerBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginBottom: 10,
+    gap: 5,
+  },
+
+  bannerBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.3,
   },
 
   bannerTitle: {
-    fontSize: 23,
+    fontSize: 25,
     fontWeight: "800",
     color: "#FFFFFF",
     marginBottom: 5,
@@ -209,7 +297,7 @@ const styles = StyleSheet.create({
   bannerSubtitle: {
     fontSize: 13,
     color: "#E2E8F0",
-    marginBottom: 15,
+    marginBottom: 16,
   },
 
   exploreButton: {
@@ -217,9 +305,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#2F6BFF",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
+    borderRadius: 12,
+    shadowColor: "#2F6BFF",
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
 
   exploreText: {
@@ -230,12 +323,14 @@ const styles = StyleSheet.create({
   },
 
   /* QUICK ACCESS */
+  sectionHeaderRow: {
+    marginBottom: 14,
+  },
 
   sectionTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: "800",
     color: "#071A3A",
-    marginBottom: 14,
   },
 
   grid: {
@@ -246,30 +341,29 @@ const styles = StyleSheet.create({
 
   card: {
     width: "31.5%",
-    minHeight: 112,
+    minHeight: 116,
     backgroundColor: "#FFFFFF",
-    borderRadius: 15,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 5,
-    marginBottom: 12,
+    paddingHorizontal: 6,
+    marginBottom: 13,
     borderWidth: 1,
     borderColor: "#EEF2F7",
-    elevation: 2,
-    shadowColor: "#000000",
+    shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2,
   },
 
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#EAF0FF",
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 9,
+    marginBottom: 10,
   },
 
   cardText: {
