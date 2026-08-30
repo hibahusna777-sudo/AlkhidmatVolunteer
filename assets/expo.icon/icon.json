@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "AlkhidmatVolunteer",
+    "slug": "AlkhidmatVolunteer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+
+    "icon": "./assets/images/alkhidmat-logo.png",
+
+    "scheme": "alkhidmatvolunteer",
+
+    "userInterfaceStyle": "light",
+
+    "android": {
+      "predictiveBackGestureEnabled": false
+    },
+
+    "web": {
+      "output": "static"
+    },
+
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#208AEF",
+          "image": "./assets/images/alkhidmat-logo.png",
+          "imageWidth": 100
+        }
+      ],
+      "expo-sharing"
+    ],
+
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
