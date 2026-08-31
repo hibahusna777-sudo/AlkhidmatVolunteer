@@ -1,205 +1,318 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
   Image,
+  Linking,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
-const opportunities = [
+const BANO_QABIL_WEBSITE = "https://banoqabil.pk/";
+
+const englishCourseCenters = [
   {
-    key: 'aptitude',
-    title: 'Bano Qabil Aptitude Test',
-    location: 'Iqra e Noor e Haq',
-    date: '30 Aug 2026, Sunday',
-    distance: '2.5 km away',
-    spots: '20 Spots Left',
-    image: require('../../assets/images/opportunities/aptitude-test.jpg'),
+    name: "Panorama Saddar",
+    phone: "0337-9616064",
+    timing: "4:00 PM - 6:00 PM",
   },
   {
-    key: 'food',
-    title: 'Food Distribution',
-    location: 'Orangi Town, Karachi',
-    date: '4 Sep 2026',
-    distance: '3.1 km away',
-    spots: '15 Spots Left',
-    image: require('../../assets/images/opportunities/food-distribution.jpg'),
+    name: "13-D, Gulshan-e-Iqbal",
+    phone: "0337-9616065",
+    timing: "8:00 PM - 10:00 PM",
   },
   {
-    key: 'blood',
-    title: 'Blood Donation Camp',
-    location: 'Liaquatabad, Karachi',
-    date: '6 Sep 2026',
-    distance: '4.0 km away',
-    spots: '15 Spots Left',
-    image: require('../../assets/images/opportunities/blood-donation.jpg'),
+    name: "PIB Colony",
+    phone: "021-34130666",
+    timing: "10:00 AM - 12:00 PM",
   },
   {
-    key: 'water',
-    title: 'Clean Water Awareness',
-    location: 'North Nazimabad, Karachi',
-    date: '10 Sep 2026',
-    distance: '5.2 km away',
-    spots: '18 Spots Left',
-    image: require('../../assets/images/opportunities/clean-water.jpg'),
+    name: "Jamia Millia Malir",
+    phone: "0337-9616062",
+    timing: "4:00 PM - 6:00 PM",
   },
 ];
 
 export default function NearbyScreen() {
   const router = useRouter();
 
+  const callCenter = (phone: string) => {
+    const digitsOnly = phone.replace(/[^0-9+]/g, "");
+    Linking.openURL(`tel:${digitsOnly}`);
+  };
+
+  const openBanoQabilWebsite = () => {
+    Linking.openURL(BANO_QABIL_WEBSITE);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.pageWrap}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={22} color="#071A3A" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Nearby Opportunities</Text>
-          <TouchableOpacity>
-            <Ionicons name="filter" size={20} color="#071A3A" />
-          </TouchableOpacity>
-        </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.page}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={24} color="#0F172A" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Nearby Opportunities</Text>
+            <View style={{ width: 24 }} />
+          </View>
 
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color="#8A96B5" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search opportunities..."
-            placeholderTextColor="#8A96B5"
-          />
-        </View>
+          <Text style={styles.subheading}>
+            Bano Qabil skill development programs open for enrollment
+          </Text>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {opportunities.map((item) => (
-            <TouchableOpacity key={item.key} style={styles.card}>
-              <Image source={item.image} style={styles.cardImage} />
-              <View style={styles.cardInfo}>
-                <Text style={styles.cardTitle}>{item.title}</Text>
-                <Text style={styles.cardLocation}>{item.location}</Text>
-                <Text style={styles.cardDate}>{item.date}</Text>
-                <View style={styles.cardBottomRow}>
-                  <Text style={styles.cardDistance}>{item.distance}</Text>
-                  <Text style={styles.cardSpots}>{item.spots}</Text>
+          {/* ================= PROGRAM 1: BANO QABIL DIGITAL INNOVATION ================= */}
+          <View style={styles.programCard}>
+            <Image
+              source={require("../../assets/images/opportunities/banoqabil.png")}
+              style={styles.programImage}
+              resizeMode="cover"
+            />
+
+            <View style={styles.programBody}>
+              <View style={styles.tagRow}>
+                <View style={[styles.tag, styles.tagGreen]}>
+                  <Ionicons name="rocket-outline" size={12} color="#22C55E" />
+                  <Text style={[styles.tagText, styles.tagTextGreen]}>
+                    IT & Digital Skills
+                  </Text>
                 </View>
               </View>
-              <Ionicons name="chevron-forward" size={16} color="#B7C0DC" />
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+
+              <Text style={styles.programTitle}>
+                Igniting Young Minds Through Digital Innovation
+              </Text>
+
+              <Text style={styles.programDescription}>
+                Bano Qabil is Alkhidmat Foundation's flagship program
+                offering free IT training, courses, and mentorship — helping
+                students build real, in-demand skills for the future.
+              </Text>
+
+              <TouchableOpacity
+                style={styles.enrollButton}
+                onPress={openBanoQabilWebsite}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="globe-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.enrollButtonText}>Enroll Now</Text>
+                <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <Text style={styles.footnote}>
+                Opens banoqabil.pk in your browser
+              </Text>
+            </View>
+          </View>
+
+          {/* ================= PROGRAM 2: SPOKEN ENGLISH COURSE ================= */}
+          <View style={styles.programCard}>
+            <Image
+              source={require("../../assets/images/opportunities/spoken-english.jpg")}
+              style={styles.programImage}
+              resizeMode="cover"
+            />
+
+            <View style={styles.programBody}>
+              <View style={styles.tagRow}>
+                <View style={styles.tag}>
+                  <Ionicons name="chatbubbles-outline" size={12} color="#2F6BFF" />
+                  <Text style={styles.tagText}>Spoken English</Text>
+                </View>
+              </View>
+
+              <Text style={styles.programTitle}>
+                Speak with Confidence. Communicate with Impact!
+              </Text>
+
+              <Text style={styles.programDescription}>
+                Admissions are open for the Spoken English Course under the
+                Alkhidmat Bano Qabil Skill Development Program — designed
+                for beginners who want to improve everyday English
+                communication and build confidence.
+              </Text>
+
+              {/* Duration / Schedule */}
+              <View style={styles.metaRow}>
+                <View style={styles.metaItem}>
+                  <Ionicons name="time-outline" size={15} color="#2F6BFF" />
+                  <Text style={styles.metaText}>2 Months</Text>
+                </View>
+                <View style={styles.metaItem}>
+                  <Ionicons name="calendar-outline" size={15} color="#2F6BFF" />
+                  <Text style={styles.metaText}>3 Days a Week</Text>
+                </View>
+              </View>
+
+              {/* Centers */}
+              <Text style={styles.centersHeading}>Available Centers</Text>
+
+              {englishCourseCenters.map((center) => (
+                <TouchableOpacity
+                  key={center.name}
+                  style={styles.centerRow}
+                  onPress={() => callCenter(center.phone)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.centerInfo}>
+                    <Text style={styles.centerName}>{center.name}</Text>
+                    <Text style={styles.centerTiming}>{center.timing}</Text>
+                  </View>
+                  <View style={styles.callButton}>
+                    <Ionicons name="call-outline" size={14} color="#2F6BFF" />
+                    <Text style={styles.callButtonText}>{center.phone}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-
-  pageWrap: {
-    flex: 1,
-    width: '100%',
+  container: { flex: 1, backgroundColor: "#F5F7FB" },
+  scrollContent: { paddingBottom: 40 },
+  page: {
+    width: "100%",
     maxWidth: 430,
-    alignSelf: 'center',
+    alignSelf: "center",
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 12,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  headerTitle: { fontSize: 16, fontWeight: "700", color: "#0F172A" },
+  subheading: {
+    fontSize: 12,
+    color: "#64748B",
+    marginBottom: 20,
   },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  programCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    overflow: "hidden",
+    marginBottom: 22,
+    borderWidth: 1,
+    borderColor: "#EEF2F7",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
+  },
+  programImage: {
+    width: "100%",
+    height: 150,
+  },
+  programBody: {
+    padding: 18,
+  },
+
+  tagRow: { flexDirection: "row", marginBottom: 10 },
+  tag: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EAF0FF",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    gap: 5,
+  },
+  tagGreen: { backgroundColor: "#E8FBF0" },
+  tagText: { fontSize: 10, fontWeight: "700", color: "#2F6BFF" },
+  tagTextGreen: { color: "#22C55E" },
+
+  programTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0F172A",
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  programDescription: {
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 20,
     marginBottom: 16,
   },
 
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#071A3A',
+  metaRow: {
+    flexDirection: "row",
+    gap: 18,
+    marginBottom: 16,
   },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
+  metaText: { fontSize: 12, fontWeight: "700", color: "#334155" },
 
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3F5FA',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 44,
-    marginBottom: 18,
-  },
-
-  searchInput: {
-    flex: 1,
-    marginLeft: 8,
+  centersHeading: {
     fontSize: 13,
-    color: '#071A3A',
+    fontWeight: "800",
+    color: "#0F172A",
+    marginBottom: 10,
+  },
+  centerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  centerInfo: { flex: 1 },
+  centerName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#0F172A",
+    marginBottom: 2,
+  },
+  centerTiming: { fontSize: 11, color: "#64748B" },
+  callButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  callButtonText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#2F6BFF",
   },
 
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 10,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
+  enrollButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#2F6BFF",
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
+    marginTop: 4,
   },
-
-  cardImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 10,
-    marginRight: 12,
-  },
-
-  cardInfo: {
-    flex: 1,
-  },
-
-  cardTitle: {
+  enrollButtonText: {
+    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: '700',
-    color: '#071A3A',
-    marginBottom: 2,
+    fontWeight: "700",
   },
-
-  cardLocation: {
-    fontSize: 12,
-    color: '#8A96B5',
-    marginBottom: 2,
-  },
-
-  cardDate: {
-    fontSize: 12,
-    color: '#5A6B8C',
-    marginBottom: 6,
-  },
-
-  cardBottomRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-
-  cardDistance: {
-    fontSize: 11,
-    color: '#5A6B8C',
-  },
-
-  cardSpots: {
-    fontSize: 11,
-    color: '#1FA855',
-    fontWeight: '700',
+  footnote: {
+    fontSize: 10,
+    color: "#94A3B8",
+    textAlign: "center",
+    marginTop: 8,
   },
 });

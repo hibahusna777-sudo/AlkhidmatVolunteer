@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -18,7 +19,7 @@ export default function HomeScreen() {
   const openCertificates = () => router.push("/certificates");
   const openAssistant = () => router.push("/assistant");
   const openBanoQabil = () => router.push("/bano-qabil");
-  const openHackathonEvent = () => router.push("/event-hackathon");
+  const openHackathon = () => router.push("/event-hackathon");
 
   const quickAccessItems = [
     {
@@ -62,10 +63,10 @@ export default function HomeScreen() {
       iconColor: "#EC4899",
     },
     {
-      key: "hackathon",
-      label: "Hackathon\nEvent",
-      icon: "trophy-outline" as const,
-      onPress: openHackathonEvent,
+      key: "bano-qabil",
+      label: "Bano Qabil",
+      icon: "school-outline" as const,
+      onPress: openBanoQabil,
       tint: "#FFF7E0",
       iconColor: "#D4A017",
     },
@@ -101,7 +102,7 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* BANNER — original image untouched, now points to Bano Qabil */}
+          {/* BANNER — Explore Events opens the Hackathon page */}
           <View style={styles.banner}>
             <Image
               source={require("../../assets/images/home-banner.jpg")}
@@ -122,7 +123,7 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.exploreButton}
-                onPress={openBanoQabil}
+                onPress={openHackathon}
                 activeOpacity={0.85}
               >
                 <Text style={styles.exploreText}>Explore Events</Text>
@@ -162,11 +163,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F7FB",
   },
-
   scrollContent: {
     paddingBottom: 30,
   },
-
   page: {
     width: "100%",
     maxWidth: 430,
@@ -174,33 +173,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
   },
-
-  /* HEADER */
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 22,
   },
-
   greeting: {
     fontSize: 14,
     color: "#64748B",
     marginBottom: 3,
   },
-
   welcome: {
     fontSize: 21,
     fontWeight: "800",
     color: "#071A3A",
   },
-
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
   },
-
   bellButton: {
     width: 42,
     height: 42,
@@ -211,7 +204,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5EAF3",
   },
-
   bellDot: {
     position: "absolute",
     top: 10,
@@ -223,7 +215,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#FFFFFF",
   },
-
   avatar: {
     width: 48,
     height: 48,
@@ -234,13 +225,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5EAF3",
   },
-
   logo: {
     width: 40,
     height: 40,
   },
-
-  /* BANNER */
   banner: {
     width: "100%",
     height: 195,
@@ -254,20 +242,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 6,
   },
-
   bannerImage: {
     width: "100%",
     height: "100%",
     position: "absolute",
   },
-
   bannerOverlay: {
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 22,
     backgroundColor: "rgba(6, 20, 46, 0.6)",
   },
-
   bannerBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -279,27 +264,23 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     gap: 5,
   },
-
   bannerBadgeText: {
     color: "#FFFFFF",
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 0.3,
   },
-
   bannerTitle: {
     fontSize: 25,
     fontWeight: "800",
     color: "#FFFFFF",
     marginBottom: 5,
   },
-
   bannerSubtitle: {
     fontSize: 13,
     color: "#E2E8F0",
     marginBottom: 16,
   },
-
   exploreButton: {
     alignSelf: "flex-start",
     flexDirection: "row",
@@ -314,31 +295,25 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-
   exploreText: {
     color: "#FFFFFF",
     fontSize: 13,
     fontWeight: "700",
     marginRight: 6,
   },
-
-  /* QUICK ACCESS */
   sectionHeaderRow: {
     marginBottom: 14,
   },
-
   sectionTitle: {
     fontSize: 18,
     fontWeight: "800",
     color: "#071A3A",
   },
-
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
-
   card: {
     width: "31.5%",
     minHeight: 116,
@@ -356,7 +331,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
-
   iconCircle: {
     width: 46,
     height: 46,
@@ -365,7 +339,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 10,
   },
-
   cardText: {
     fontSize: 11,
     lineHeight: 15,

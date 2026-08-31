@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,25 +13,26 @@ import {
 
 type EventStatus = "upcoming" | "completed";
 
-type EventIconName = React.ComponentProps<typeof Ionicons>["name"];
-
 interface EventItem {
   id: string;
   title: string;
   dateTime: string;
   location: string;
   status: EventStatus;
-  icon: EventIconName;
+  image: any;
+  route?: string;
 }
 
+// Only images confirmed to exist in assets/images/opportunities are used here.
 const EVENTS: EventItem[] = [
   {
     id: "1",
-    title: "Tree Plantation Drive",
-    dateTime: "22 Aug 2026 - 08:00 AM",
-    location: "Gulshan-e-Iqbal, Karachi",
+    title: "Alibaba Hackathon",
+    dateTime: "29 Sep 2026 - 05:00 PM",
+    location: "Expo Center, Karachi",
     status: "upcoming",
-    icon: "leaf-outline",
+    image: require("../../assets/images/opportunities/hackathon.jpg"),
+    route: "/event-hackathon",
   },
   {
     id: "2",
@@ -38,7 +40,7 @@ const EVENTS: EventItem[] = [
     dateTime: "24 Aug 2026 - 09:00 AM",
     location: "Orangi Town, Karachi",
     status: "upcoming",
-    icon: "fast-food-outline",
+    image: require("../../assets/images/opportunities/food-distribution.jpg"),
   },
   {
     id: "3",
@@ -46,31 +48,48 @@ const EVENTS: EventItem[] = [
     dateTime: "26 Aug 2026 - 11:00 AM",
     location: "Liaquatabad, Karachi",
     status: "upcoming",
-    icon: "water-outline",
+    image: require("../../assets/images/opportunities/blood-donation.jpg"),
   },
   {
     id: "4",
+    title: "Clean Water Awareness",
+    dateTime: "10 Sep 2026 - 10:00 AM",
+    location: "North Nazimabad, Karachi",
+    status: "upcoming",
+    image: require("../../assets/images/opportunities/clean-water.jpg"),
+  },
+  {
+    id: "5",
     title: "Vocal Mania Voice",
     dateTime: "29 Aug 2026 - 05:00 PM",
     location: "Alkhidmat Hall, Karachi",
     status: "upcoming",
-    icon: "mic-outline",
+    image: require("../../assets/images/opportunities/vocal-mania-voice.jpg"),
   },
   {
-    id: "5",
+    id: "6",
     title: "Podcast Stories",
     dateTime: "31 Aug 2026 - 04:00 PM",
     location: "Alkhidmat Media Center, Karachi",
     status: "upcoming",
-    icon: "mic-outline",
+    image: require("../../assets/images/opportunities/podcast-stories.jpg"),
   },
   {
-    id: "6",
+    id: "7",
     title: "E-Gaming Arena",
     dateTime: "02 Sep 2026 - 06:00 PM",
     location: "Expo Center, Karachi",
     status: "upcoming",
-    icon: "game-controller-outline",
+    image: require("../../assets/images/opportunities/e-gaming-arena.jpg"),
+  },
+  {
+    id: "8",
+    title: "Bano Qabil Aptitude Test",
+    dateTime: "30 Aug 2026 - 10:00 AM",
+    location: "Iqra e Noor e Haq",
+    status: "upcoming",
+    image: require("../../assets/images/opportunities/aptitude-test.jpg"),
+    route: "/bano-qabil",
   },
 ];
 
@@ -78,16 +97,13 @@ const BRAND_BLUE = "#2F6BFF";
 
 export default function MyEventsScreen() {
   const router = useRouter();
-
   const [activeTab, setActiveTab] = useState<EventStatus>("upcoming");
 
-  const filteredEvents = EVENTS.filter(
-    (event) => event.status === activeTab
-  );
+  const filteredEvents = EVENTS.filter((event) => event.status === activeTab);
 
   const handleEventPress = (event: EventItem) => {
-    if (event.id === "6") {
-      router.push("/event-hackathon" as any);
+    if (event.route) {
+      router.push(event.route as any);
     }
   };
 
@@ -114,10 +130,7 @@ export default function MyEventsScreen() {
             color={activeTab === "upcoming" ? "#FFFFFF" : BRAND_BLUE}
           />
           <Text
-            style={[
-              styles.tabText,
-              activeTab === "upcoming" && styles.activeTabText,
-            ]}
+            style={[styles.tabText, activeTab === "upcoming" && styles.activeTabText]}
           >
             Upcoming
           </Text>
@@ -134,10 +147,7 @@ export default function MyEventsScreen() {
             color={activeTab === "completed" ? "#FFFFFF" : BRAND_BLUE}
           />
           <Text
-            style={[
-              styles.tabText,
-              activeTab === "completed" && styles.activeTabText,
-            ]}
+            style={[styles.tabText, activeTab === "completed" && styles.activeTabText]}
           >
             Completed
           </Text>
@@ -167,37 +177,23 @@ export default function MyEventsScreen() {
               activeOpacity={0.85}
               onPress={() => handleEventPress(event)}
             >
-              <View style={styles.iconBox}>
-                <Ionicons name={event.icon} size={27} color={BRAND_BLUE} />
-              </View>
+              <Image source={event.image} style={styles.eventImage} resizeMode="cover" />
 
               <View style={styles.eventInfo}>
                 <Text style={styles.eventTitle}>{event.title}</Text>
 
                 <View style={styles.infoRow}>
-                  <Ionicons
-                    name="calendar-outline"
-                    size={13}
-                    color={BRAND_BLUE}
-                  />
+                  <Ionicons name="calendar-outline" size={13} color={BRAND_BLUE} />
                   <Text style={styles.infoText}>{event.dateTime}</Text>
                 </View>
 
                 <View style={styles.infoRow}>
-                  <Ionicons
-                    name="location-outline"
-                    size={13}
-                    color={BRAND_BLUE}
-                  />
+                  <Ionicons name="location-outline" size={13} color={BRAND_BLUE} />
                   <Text style={styles.infoText}>{event.location}</Text>
                 </View>
 
                 <View style={styles.registered}>
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={13}
-                    color="#16803C"
-                  />
+                  <Ionicons name="checkmark-circle" size={13} color="#16803C" />
                   <Text style={styles.registeredText}>Registered</Text>
                 </View>
               </View>
@@ -214,29 +210,10 @@ export default function MyEventsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-
-  headerTitle: {
-    fontSize: 26,
-    fontWeight: "800",
-    color: "#071A3A",
-  },
-
-  headerSubtitle: {
-    fontSize: 13,
-    color: "#5A6B8C",
-    marginTop: 4,
-  },
-
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
+  headerTitle: { fontSize: 26, fontWeight: "800", color: "#071A3A" },
+  headerSubtitle: { fontSize: 13, color: "#5A6B8C", marginTop: 4 },
   tabContainer: {
     flexDirection: "row",
     marginHorizontal: 20,
@@ -248,7 +225,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#DCE8F5",
   },
-
   tab: {
     flex: 1,
     flexDirection: "row",
@@ -257,27 +233,10 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     borderRadius: 10,
   },
-
-  activeTab: {
-    backgroundColor: BRAND_BLUE,
-  },
-
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: BRAND_BLUE,
-    marginLeft: 6,
-  },
-
-  activeTabText: {
-    color: "#FFFFFF",
-  },
-
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-  },
-
+  activeTab: { backgroundColor: BRAND_BLUE },
+  tabText: { fontSize: 14, fontWeight: "600", color: BRAND_BLUE, marginLeft: 6 },
+  activeTabText: { color: "#FFFFFF" },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 30 },
   eventCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -285,7 +244,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E3E7F2",
     borderRadius: 16,
-    padding: 13,
+    padding: 10,
     marginBottom: 14,
     shadowColor: "#000000",
     shadowOpacity: 0.05,
@@ -293,41 +252,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
-
-  iconBox: {
-    width: 58,
-    height: 58,
-    borderRadius: 14,
-    backgroundColor: "#EAF1FF",
-    alignItems: "center",
-    justifyContent: "center",
+  eventImage: {
+    width: 64,
+    height: 64,
+    borderRadius: 12,
     marginRight: 12,
   },
-
-  eventInfo: {
-    flex: 1,
-  },
-
-  eventTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#071A3A",
-    marginBottom: 6,
-  },
-
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-
-  infoText: {
-    fontSize: 12,
-    color: "#5A6B8C",
-    marginLeft: 5,
-    flex: 1,
-  },
-
+  eventInfo: { flex: 1 },
+  eventTitle: { fontSize: 15, fontWeight: "700", color: "#071A3A", marginBottom: 6 },
+  infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+  infoText: { fontSize: 12, color: "#5A6B8C", marginLeft: 5, flex: 1 },
   registered: {
     alignSelf: "flex-start",
     flexDirection: "row",
@@ -338,14 +272,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginTop: 2,
   },
-
-  registeredText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#16803C",
-    marginLeft: 4,
-  },
-
+  registeredText: { fontSize: 11, fontWeight: "700", color: "#16803C", marginLeft: 4 },
   arrowBox: {
     width: 30,
     height: 30,
@@ -355,14 +282,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginLeft: 8,
   },
-
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 80,
-    paddingHorizontal: 30,
-  },
-
+  emptyState: { alignItems: "center", justifyContent: "center", marginTop: 80, paddingHorizontal: 30 },
   emptyIcon: {
     width: 76,
     height: 76,
@@ -372,18 +292,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 14,
   },
-
-  emptyTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#071A3A",
-  },
-
-  emptyText: {
-    fontSize: 13,
-    color: "#5A6B8C",
-    textAlign: "center",
-    marginTop: 6,
-    lineHeight: 19,
-  },
+  emptyTitle: { fontSize: 17, fontWeight: "700", color: "#071A3A" },
+  emptyText: { fontSize: 13, color: "#5A6B8C", textAlign: "center", marginTop: 6, lineHeight: 19 },
 });

@@ -20,35 +20,30 @@ export default function RegistrationSuccessScreen() {
 
         <Text style={styles.title}>You're Registered!</Text>
         <Text style={styles.subtitle}>
-          Your registration for{"\n"}
-          <Text style={styles.eventName}>Alibaba Hackathon</Text> was successful.
+          Your registration was completed successfully.
         </Text>
 
         <View style={styles.infoCard}>
           <View style={styles.infoRow}>
-            <Ionicons name="calendar-outline" size={18} color="#2F6BFF" />
-            <Text style={styles.infoText}>29 Sep 2026 (Tuesday)</Text>
+            <Ionicons name="mail-outline" size={18} color="#2F6BFF" />
+            <Text style={styles.infoText}>
+              A confirmation has been noted for your registration.
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Ionicons name="time-outline" size={18} color="#2F6BFF" />
-            <Text style={styles.infoText}>5:00 PM Onward</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="location-outline" size={18} color="#2F6BFF" />
-            <Text style={styles.infoText}>Expo Center, Karachi</Text>
+            <Text style={styles.infoText}>
+              Please arrive on time with a valid ID.
+            </Text>
           </View>
         </View>
-
-        <Text style={styles.note}>
-          A confirmation message has been sent to your phone number. Please
-          arrive 15 minutes early with a valid ID.
-        </Text>
       </View>
 
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => router.push("/home" as any)}
+          activeOpacity={0.85}
         >
           <Text style={styles.primaryButtonText}>Back to Home</Text>
         </TouchableOpacity>
@@ -56,8 +51,9 @@ export default function RegistrationSuccessScreen() {
         <TouchableOpacity
           style={styles.secondaryButton}
           onPress={() => router.push("/my-events" as any)}
+          activeOpacity={0.7}
         >
-          <Text style={styles.secondaryButtonText}>View Event Details</Text>
+          <Text style={styles.secondaryButtonText}>View My Events</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -104,16 +100,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 24,
   },
-  eventName: {
-    fontWeight: "700",
-    color: "#2F6BFF",
-  },
   infoCard: {
     width: "100%",
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 18,
-    marginBottom: 20,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -122,20 +113,15 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 12,
+    gap: 10,
   },
   infoText: {
-    fontSize: 14,
+    flex: 1,
+    fontSize: 13,
     color: "#334155",
-    marginLeft: 10,
-  },
-  note: {
-    fontSize: 12,
-    color: "#94A3B8",
-    textAlign: "center",
-    lineHeight: 18,
-    paddingHorizontal: 10,
+    lineHeight: 19,
   },
   footer: {
     paddingHorizontal: 24,
