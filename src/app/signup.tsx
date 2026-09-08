@@ -1,6 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
+import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -13,6 +16,17 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+WebBrowser.maybeCompleteAuthSession();
+
+// Real Client ID, from Google Cloud Console (Web application type)
+const GOOGLE_WEB_CLIENT_ID =
+  '758307128837-d6mvtq49fjjfk28koi78t2ndaostf9gj.apps.googleusercontent.com';
+
+const GOOGLE_CLIENT_ID = {
+  expoClientId: GOOGLE_WEB_CLIENT_ID,
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+};
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -28,6 +42,78 @@ export default function SignupScreen() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest(GOOGLE_CLIENT_ID);
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      fetchGoogleProfile(authentication?.accessToken);
+    } else if (response?.type === 'error') {
+      Alert.alert('Google Sign-Up Failed', 'Please try again.');
+    }
+  }, [response]);
+
+  const fetchGoogleProfile = async (accessToken?: string) => {
+    if (!accessToken) return;
+    try {
+      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const profile = await res.json();
+
+      // TODO: yahan profile.email / profile.name se apna backend
+      // (Supabase / Firebase) account create karen.
+      Alert.alert(
+        'Signed up with Google',
+        `Welcome ${profile.name || ''}`,
+        [{ text: 'Continue', onPress: () => router.replace('/home' as any) }],
+      );
+    } catch {
+      Alert.alert('Error', 'Could not fetch your Google profile.');
+    }
+  };
+
+  const handleGoogleSignup = () => {
+    if (!request) {
+      Alert.alert('Please wait', 'Still preparing Google Sign-In, try again in a moment.');
+      return;
+    }
+    promptAsync();
+  };
+
+  const handleAppleSignup = async () => {
+    if (Platform.OS !== 'ios') {
+      Alert.alert(
+        'iOS Only',
+        'Apple Sign-In only works on iOS devices with a development build, not on Android or Expo Go on Android.',
+      );
+      return;
+    }
+
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // TODO: yahan credential.user / credential.email se apna backend
+      // (Supabase / Firebase) account create karen.
+      Alert.alert(
+        'Signed up with Apple',
+        `Welcome ${credential.fullName?.givenName || ''}`,
+        [{ text: 'Continue', onPress: () => router.replace('/home' as any) }],
+      );
+    } catch (e: any) {
+      if (e.code === 'ERR_REQUEST_CANCELED') {
+        // user cancelled, do nothing
+      } else {
+        Alert.alert('Apple Sign-Up Failed', 'Please try again.');
+      }
+    }
+  };
 
   const handleSignup = () => {
     if (!name.trim()) {
@@ -81,33 +167,9 @@ export default function SignupScreen() {
       [
         {
           text: 'Continue',
-          onPress: () => router.replace('/login'),
+          onPress: () => router.replace('/login' as any),
         },
       ],
-    );
-  };
-
-  const handleGoogleSignup = () => {
-    /*
-      TEMPORARY:
-      Real Google Sign-In (via Supabase or expo-auth-session)
-      will be connected here later.
-    */
-    Alert.alert(
-      'Coming Soon',
-      'Google sign-up will be available once account services are connected.',
-    );
-  };
-
-  const handleAppleSignup = () => {
-    /*
-      TEMPORARY:
-      Real Apple Sign-In (via expo-apple-authentication)
-      will be connected here later.
-    */
-    Alert.alert(
-      'Coming Soon',
-      'Apple sign-up will be available once account services are connected.',
     );
   };
 
@@ -142,18 +204,16 @@ export default function SignupScreen() {
                 </Text>
               </TouchableOpacity>
 
-              {Platform.OS === 'ios' && (
-                <TouchableOpacity
-                  style={[styles.socialButton, styles.appleButton]}
-                  onPress={handleAppleSignup}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
-                  <Text style={styles.appleButtonText}>
-                    Continue with Apple
-                  </Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[styles.socialButton, styles.appleButton]}
+                onPress={handleAppleSignup}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
+                <Text style={styles.appleButtonText}>
+                  Continue with Apple
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* DIVIDER */}
@@ -357,7 +417,7 @@ export default function SignupScreen() {
             <View style={styles.loginRow}>
               <Text style={styles.loginText}>Already have an account? </Text>
               <TouchableOpacity
-                onPress={() => router.push('/login')}
+                onPress={() => router.push('/login' as any)}
                 activeOpacity={0.7}
               >
                 <Text style={styles.loginLink}>Login</Text>

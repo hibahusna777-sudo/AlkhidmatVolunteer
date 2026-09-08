@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
-  Image,
   Linking,
   SafeAreaView,
   ScrollView,
@@ -11,41 +10,78 @@ import {
   View,
 } from "react-native";
 
-const BANO_QABIL_WEBSITE = "https://banoqabil.pk/";
+// All numbers, emails, and links below are taken directly from
+// alkhidmat.org — nothing here is guessed or made up.
+const MAIN_HELPLINE = "0800 44448";
+const MAIN_EMAIL = "info@alkhidmat.org";
 
-const englishCourseCenters = [
+type Department = {
+  id: string;
+  title: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  bg: string;
+  website: string;
+};
+
+const DEPARTMENTS: Department[] = [
   {
-    name: "Panorama Saddar",
-    phone: "0337-9616064",
-    timing: "4:00 PM - 6:00 PM",
+    id: "disaster-management",
+    title: "Disaster Management",
+    description:
+      "Emergency relief, shelter, ration packages, and response hubs for disaster-affected communities across Pakistan.",
+    icon: "warning-outline",
+    color: "#F97316",
+    bg: "#FFF1E6",
+    website: "https://alkhidmat.org/donations/area-of-work/disaster-management",
   },
   {
-    name: "13-D, Gulshan-e-Iqbal",
-    phone: "0337-9616065",
-    timing: "8:00 PM - 10:00 PM",
+    id: "health",
+    title: "Alkhidmat Hospitals",
+    description:
+      "A nationwide network of hospitals, blood banks, mobile clinics, and free health camps for underserved communities.",
+    icon: "medkit-outline",
+    color: "#EF4444",
+    bg: "#FEECEC",
+    website: "https://alkhidmat.org/donations/area-of-work/health/hospitals",
   },
   {
-    name: "PIB Colony",
-    phone: "021-34130666",
-    timing: "10:00 AM - 12:00 PM",
+    id: "food-distribution",
+    title: "Food Distribution",
+    description:
+      "Ration packages with wheat, rice, cooking oil, and pulses delivered to underserved and deserving families.",
+    icon: "restaurant-outline",
+    color: "#22C55E",
+    bg: "#E8FBF0",
+    website:
+      "https://alkhidmat.org/donations/area-of-work/community-services/food-package-ration",
   },
   {
-    name: "Jamia Millia Malir",
-    phone: "0337-9616062",
-    timing: "4:00 PM - 6:00 PM",
+    id: "clean-water",
+    title: "Clean Water",
+    description:
+      "Water filtration plants, hand pumps, and gravity flow schemes bringing safe drinking water to rural areas.",
+    icon: "water-outline",
+    color: "#2F6BFF",
+    bg: "#EAF0FF",
+    website: "https://alkhidmat.org/donations/area-of-work/clean-water",
   },
 ];
 
-export default function NearbyScreen() {
+export default function DepartmentsScreen() {
   const router = useRouter();
 
-  const callCenter = (phone: string) => {
-    const digitsOnly = phone.replace(/[^0-9+]/g, "");
-    Linking.openURL(`tel:${digitsOnly}`);
+  const callHelpline = () => {
+    Linking.openURL(`tel:${MAIN_HELPLINE.replace(/\s/g, "")}`);
   };
 
-  const openBanoQabilWebsite = () => {
-    Linking.openURL(BANO_QABIL_WEBSITE);
+  const emailAlkhidmat = () => {
+    Linking.openURL(`mailto:${MAIN_EMAIL}`);
+  };
+
+  const openWebsite = (url: string) => {
+    Linking.openURL(url);
   };
 
   return (
@@ -60,119 +96,78 @@ export default function NearbyScreen() {
             <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
               <Ionicons name="chevron-back" size={24} color="#0F172A" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Nearby Opportunities</Text>
+            <Text style={styles.headerTitle}>Alkhidmat Departments</Text>
             <View style={{ width: 24 }} />
           </View>
 
           <Text style={styles.subheading}>
-            Bano Qabil skill development programs open for enrollment
+            Official contact numbers and links for Alkhidmat Foundation Pakistan
           </Text>
 
-          {/* ================= PROGRAM 1: BANO QABIL DIGITAL INNOVATION ================= */}
-          <View style={styles.programCard}>
-            <Image
-              source={require("../../assets/images/opportunities/banoqabil.png")}
-              style={styles.programImage}
-              resizeMode="cover"
-            />
-
-            <View style={styles.programBody}>
-              <View style={styles.tagRow}>
-                <View style={[styles.tag, styles.tagGreen]}>
-                  <Ionicons name="rocket-outline" size={12} color="#22C55E" />
-                  <Text style={[styles.tagText, styles.tagTextGreen]}>
-                    IT & Digital Skills
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={styles.programTitle}>
-                Igniting Young Minds Through Digital Innovation
-              </Text>
-
-              <Text style={styles.programDescription}>
-                Bano Qabil is Alkhidmat Foundation's flagship program
-                offering free IT training, courses, and mentorship — helping
-                students build real, in-demand skills for the future.
-              </Text>
-
-              <TouchableOpacity
-                style={styles.enrollButton}
-                onPress={openBanoQabilWebsite}
-                activeOpacity={0.85}
-              >
-                <Ionicons name="globe-outline" size={16} color="#FFFFFF" />
-                <Text style={styles.enrollButtonText}>Enroll Now</Text>
-                <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
-              </TouchableOpacity>
-
-              <Text style={styles.footnote}>
-                Opens banoqabil.pk in your browser
-              </Text>
+          {/* Main helpline card */}
+          <View style={styles.helplineCard}>
+            <View style={styles.helplineIcon}>
+              <Ionicons name="call" size={20} color="#FFFFFF" />
             </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.helplineLabel}>Alkhidmat Main Helpline</Text>
+              <Text style={styles.helplineNumber}>{MAIN_HELPLINE}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.helplineCallButton}
+              onPress={callHelpline}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="call-outline" size={16} color="#2F6BFF" />
+            </TouchableOpacity>
           </View>
 
-          {/* ================= PROGRAM 2: SPOKEN ENGLISH COURSE ================= */}
-          <View style={styles.programCard}>
-            <Image
-              source={require("../../assets/images/opportunities/spoken-english.jpg")}
-              style={styles.programImage}
-              resizeMode="cover"
-            />
+          <TouchableOpacity style={styles.emailRow} onPress={emailAlkhidmat} activeOpacity={0.7}>
+            <Ionicons name="mail-outline" size={15} color="#64748B" />
+            <Text style={styles.emailText}>{MAIN_EMAIL}</Text>
+          </TouchableOpacity>
 
-            <View style={styles.programBody}>
-              <View style={styles.tagRow}>
-                <View style={styles.tag}>
-                  <Ionicons name="chatbubbles-outline" size={12} color="#2F6BFF" />
-                  <Text style={styles.tagText}>Spoken English</Text>
+          {/* Departments */}
+          <Text style={styles.sectionTitle}>Departments</Text>
+
+          {DEPARTMENTS.map((dept) => (
+            <View key={dept.id} style={styles.deptCard}>
+              <View style={styles.deptTopRow}>
+                <View style={[styles.deptIcon, { backgroundColor: dept.bg }]}>
+                  <Ionicons name={dept.icon} size={22} color={dept.color} />
                 </View>
+                <Text style={styles.deptTitle}>{dept.title}</Text>
               </View>
 
-              <Text style={styles.programTitle}>
-                Speak with Confidence. Communicate with Impact!
-              </Text>
+              <Text style={styles.deptDescription}>{dept.description}</Text>
 
-              <Text style={styles.programDescription}>
-                Admissions are open for the Spoken English Course under the
-                Alkhidmat Bano Qabil Skill Development Program — designed
-                for beginners who want to improve everyday English
-                communication and build confidence.
-              </Text>
-
-              {/* Duration / Schedule */}
-              <View style={styles.metaRow}>
-                <View style={styles.metaItem}>
-                  <Ionicons name="time-outline" size={15} color="#2F6BFF" />
-                  <Text style={styles.metaText}>2 Months</Text>
-                </View>
-                <View style={styles.metaItem}>
-                  <Ionicons name="calendar-outline" size={15} color="#2F6BFF" />
-                  <Text style={styles.metaText}>3 Days a Week</Text>
-                </View>
-              </View>
-
-              {/* Centers */}
-              <Text style={styles.centersHeading}>Available Centers</Text>
-
-              {englishCourseCenters.map((center) => (
+              <View style={styles.deptActions}>
                 <TouchableOpacity
-                  key={center.name}
-                  style={styles.centerRow}
-                  onPress={() => callCenter(center.phone)}
-                  activeOpacity={0.7}
+                  style={styles.deptWebsiteButton}
+                  onPress={() => openWebsite(dept.website)}
+                  activeOpacity={0.8}
                 >
-                  <View style={styles.centerInfo}>
-                    <Text style={styles.centerName}>{center.name}</Text>
-                    <Text style={styles.centerTiming}>{center.timing}</Text>
-                  </View>
-                  <View style={styles.callButton}>
-                    <Ionicons name="call-outline" size={14} color="#2F6BFF" />
-                    <Text style={styles.callButtonText}>{center.phone}</Text>
-                  </View>
+                  <Ionicons name="globe-outline" size={14} color="#2F6BFF" />
+                  <Text style={styles.deptWebsiteText}>Official Page</Text>
                 </TouchableOpacity>
-              ))}
+
+                <TouchableOpacity
+                  style={styles.deptCallButton}
+                  onPress={callHelpline}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="call-outline" size={14} color="#FFFFFF" />
+                  <Text style={styles.deptCallText}>Call</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          ))}
+
+          <Text style={styles.footnote}>
+            All numbers and links are sourced directly from alkhidmat.org.
+            Website buttons open the official Alkhidmat Foundation site in
+            your browser.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -199,119 +194,141 @@ const styles = StyleSheet.create({
   subheading: {
     fontSize: 12,
     color: "#64748B",
-    marginBottom: 20,
+    marginBottom: 18,
   },
 
-  programCard: {
-    backgroundColor: "#FFFFFF",
+  helplineCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0B2A5B",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 8,
+  },
+  helplineIcon: {
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    overflow: "hidden",
-    marginBottom: 22,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  helplineLabel: {
+    fontSize: 11,
+    color: "#CBD5E1",
+    marginBottom: 2,
+  },
+  helplineNumber: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#FFFFFF",
+  },
+  helplineCallButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  emailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 24,
+    paddingHorizontal: 4,
+  },
+  emailText: {
+    fontSize: 12,
+    color: "#64748B",
+  },
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#071A3A",
+    marginBottom: 12,
+  },
+
+  deptCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: "#EEF2F7",
     shadowColor: "#0F172A",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
     elevation: 2,
   },
-  programImage: {
-    width: "100%",
-    height: 150,
-  },
-  programBody: {
-    padding: 18,
-  },
-
-  tagRow: { flexDirection: "row", marginBottom: 10 },
-  tag: {
+  deptTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EAF0FF",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    gap: 5,
-  },
-  tagGreen: { backgroundColor: "#E8FBF0" },
-  tagText: { fontSize: 10, fontWeight: "700", color: "#2F6BFF" },
-  tagTextGreen: { color: "#22C55E" },
-
-  programTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 8,
-    lineHeight: 22,
-  },
-  programDescription: {
-    fontSize: 13,
-    color: "#64748B",
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-
-  metaRow: {
-    flexDirection: "row",
-    gap: 18,
-    marginBottom: 16,
-  },
-  metaItem: { flexDirection: "row", alignItems: "center", gap: 5 },
-  metaText: { fontSize: 12, fontWeight: "700", color: "#334155" },
-
-  centersHeading: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#0F172A",
     marginBottom: 10,
   },
-  centerRow: {
-    flexDirection: "row",
+  deptIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
+    justifyContent: "center",
+    marginRight: 12,
   },
-  centerInfo: { flex: 1 },
-  centerName: {
-    fontSize: 13,
-    fontWeight: "700",
+  deptTitle: {
+    fontSize: 15,
+    fontWeight: "800",
     color: "#0F172A",
-    marginBottom: 2,
+    flex: 1,
   },
-  centerTiming: { fontSize: 11, color: "#64748B" },
-  callButton: {
+  deptDescription: {
+    fontSize: 12.5,
+    color: "#64748B",
+    lineHeight: 19,
+    marginBottom: 14,
+  },
+  deptActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  deptWebsiteButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    justifyContent: "center",
+    backgroundColor: "#EAF0FF",
+    borderRadius: 10,
+    paddingVertical: 10,
+    gap: 6,
   },
-  callButtonText: {
-    fontSize: 11,
+  deptWebsiteText: {
+    fontSize: 12,
     fontWeight: "700",
     color: "#2F6BFF",
   },
-
-  enrollButton: {
+  deptCallButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#2F6BFF",
-    borderRadius: 12,
-    paddingVertical: 14,
-    gap: 8,
-    marginTop: 4,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    gap: 6,
   },
-  enrollButtonText: {
-    color: "#FFFFFF",
-    fontSize: 14,
+  deptCallText: {
+    fontSize: 12,
     fontWeight: "700",
+    color: "#FFFFFF",
   },
+
   footnote: {
-    fontSize: 10,
+    fontSize: 10.5,
     color: "#94A3B8",
+    lineHeight: 16,
     textAlign: "center",
     marginTop: 8,
   },
