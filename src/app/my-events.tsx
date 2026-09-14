@@ -12,7 +12,6 @@ import {
 } from "react-native";
 
 type EventStatus = "upcoming" | "completed";
-
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
 interface EventItem {
@@ -26,27 +25,38 @@ interface EventItem {
   iconBackground: string;
   status: EventStatus;
   officialUrl: string;
+  featured?: boolean;
 }
+
+/* =========================================================
+   ALKHIDMAT PROGRAMS
+   IMPORTANT:
+   1. Islamic Microfinance / Mawakhat
+   2. Community Services
+   3. Volunteer Management
+   ========================================================= */
 
 const EVENTS: EventItem[] = [
   {
     id: "1",
-    title: "Volunteer Management Department",
+    title: "Islamic Microfinance / Mawakhat",
     subtitle:
-      "Volunteer programs, training, field activities and community campaigns.",
-    category: "Volunteer Management",
+      "Interest-free financial support helping deserving families build stable and self-reliant lives.",
+    category: "Islamic Microfinance",
     location: "Pakistan",
-    icon: "people-outline",
-    iconColor: "#2457D6",
-    iconBackground: "#EAF1FF",
+    icon: "cash-outline",
+    iconColor: "#D5A52B",
+    iconBackground: "#FFF8E5",
     status: "upcoming",
-    officialUrl: "https://volunteer.alkhidmat.org/public/about-us",
+    featured: true,
+    officialUrl:
+      "https://alkhidmat.org/donations/area-of-work/islamic-microfinance",
   },
   {
     id: "2",
     title: "Community Services",
     subtitle:
-      "Serving communities through food packages, welfare support and humanitarian services.",
+      "Community welfare, food support, humanitarian assistance and services for people in need.",
     category: "Community Services",
     location: "Pakistan",
     icon: "heart-outline",
@@ -58,23 +68,23 @@ const EVENTS: EventItem[] = [
   },
   {
     id: "3",
-    title: "Islamic Microfinance / Mawakhat",
+    title: "Volunteer Management Department",
     subtitle:
-      "Interest-free financial support designed to help deserving families become self-reliant.",
-    category: "Islamic Microfinance",
+      "Volunteer programs, training, field activities and meaningful community campaigns.",
+    category: "Volunteer Management",
     location: "Pakistan",
-    icon: "cash-outline",
-    iconColor: "#7550C9",
-    iconBackground: "#F1EBFF",
+    icon: "people-outline",
+    iconColor: "#2F6BFF",
+    iconBackground: "#EAF1FF",
     status: "upcoming",
     officialUrl:
-      "https://alkhidmat.org/donations/area-of-work/islamic-microfinance",
+      "https://volunteer.alkhidmat.org/public/about-us",
   },
   {
     id: "4",
     title: "Blood Donation",
     subtitle:
-      "Support safe blood availability for patients, trauma victims and communities in need.",
+      "Supporting safe blood availability for patients and communities through organized donation activities.",
     category: "Health Services",
     location: "Pakistan",
     icon: "water-outline",
@@ -88,7 +98,7 @@ const EVENTS: EventItem[] = [
     id: "5",
     title: "Clean Water Awareness",
     subtitle:
-      "Promoting access to safe water, sanitation and hygiene for communities in need.",
+      "Promoting safe water, sanitation and hygiene awareness for communities in need.",
     category: "WASH Program",
     location: "Pakistan",
     icon: "water-outline",
@@ -114,9 +124,19 @@ const EVENTS: EventItem[] = [
   },
 ];
 
-const BRAND_BLUE = "#1857D8";
-const DARK_BLUE = "#10234B";
-const MUTED = "#71809C";
+const COLORS = {
+  navy: "#071A3A",
+  navy2: "#0D2B63",
+  blue: "#2F6BFF",
+  blueLight: "#EAF1FF",
+  white: "#FFFFFF",
+  background: "#F5F8FD",
+  text: "#10234B",
+  muted: "#71809C",
+  border: "#E1E8F3",
+  green: "#16803C",
+  greenLight: "#EAF8EF",
+};
 
 export default function MyEventsScreen() {
   const router = useRouter();
@@ -124,10 +144,9 @@ export default function MyEventsScreen() {
   const [activeTab, setActiveTab] =
     useState<EventStatus>("upcoming");
 
-  const displayedEvents =
-    activeTab === "upcoming"
-      ? EVENTS.filter((event) => event.status === "upcoming")
-      : EVENTS.filter((event) => event.status === "completed");
+  const displayedEvents = EVENTS.filter(
+    (event) => event.status === activeTab
+  );
 
   const openOfficialProgram = async (url: string) => {
     try {
@@ -135,12 +154,11 @@ export default function MyEventsScreen() {
 
       if (supported) {
         await Linking.openURL(url);
+      } else {
+        console.log("URL cannot be opened:", url);
       }
     } catch (error) {
-      console.log(
-        "Unable to open official program:",
-        error
-      );
+      console.log("Unable to open official program:", error);
     }
   };
 
@@ -154,288 +172,392 @@ export default function MyEventsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>
-            My Events
-          </Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.pageContent}
+      >
+        {/* =================================================
+            HERO HEADER
+            ================================================= */}
 
-          <Text style={styles.headerSubtitle}>
-            Manage your volunteering activities
-          </Text>
-        </View>
+        <View style={styles.hero}>
+          {/* Decorative circles */}
+          <View style={styles.heroCircleOne} />
+          <View style={styles.heroCircleTwo} />
 
-        <View style={styles.countCard}>
-          <View style={styles.countIcon}>
+          <View style={styles.heroTopRow}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+              activeOpacity={0.8}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={20}
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
+
+            <View style={styles.heroBadge}>
+              <View style={styles.onlineDot} />
+
+              <Text style={styles.heroBadgeText}>
+                VOLUNTEER HUB
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.heroIcon}>
             <Ionicons
-              name="calendar-outline"
-              size={19}
-              color={BRAND_BLUE}
+              name="calendar-clear-outline"
+              size={30}
+              color={COLORS.white}
             />
           </View>
 
+          <Text style={styles.heroTitle}>
+            My Events
+          </Text>
+
+          <Text style={styles.heroSubtitle}>
+            Discover programs, serve communities
+            {"\n"}and make a meaningful difference.
+          </Text>
+
+          <View style={styles.heroStats}>
+            <View style={styles.heroStat}>
+              <Text style={styles.heroStatNumber}>
+                {EVENTS.length}
+              </Text>
+
+              <Text style={styles.heroStatLabel}>
+                Programs
+              </Text>
+            </View>
+
+            <View style={styles.statDivider} />
+
+            <View style={styles.heroStat}>
+              <Text style={styles.heroStatNumber}>
+                {EVENTS.filter(
+                  (event) => event.status === "upcoming"
+                ).length}
+              </Text>
+
+              <Text style={styles.heroStatLabel}>
+                Available
+              </Text>
+            </View>
+
+            <View style={styles.statDivider} />
+
+            <View style={styles.heroStat}>
+              <Ionicons
+                name="globe-outline"
+                size={22}
+                color={COLORS.white}
+              />
+
+              <Text style={styles.heroStatLabel}>
+                Pakistan
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* =================================================
+            SECTION INTRO
+            ================================================= */}
+
+        <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.countLabel}>
-              My Programs
+            <Text style={styles.sectionEyebrow}>
+              EXPLORE OPPORTUNITIES
             </Text>
 
-            <Text style={styles.countNumber}>
-              {EVENTS.length}
+            <Text style={styles.sectionTitle}>
+              Programs for Impact
+            </Text>
+          </View>
+
+          <View style={styles.programCount}>
+            <Text style={styles.programCountText}>
+              {displayedEvents.length}
             </Text>
           </View>
         </View>
-      </View>
 
-      {/* INTRO */}
-      <View style={styles.introCard}>
-        <View style={styles.introIcon}>
-          <Ionicons
-            name="hand-left-outline"
-            size={24}
-            color={BRAND_BLUE}
-          />
+        {/* =================================================
+            TABS
+            ================================================= */}
+
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              activeTab === "upcoming" && styles.activeTab,
+            ]}
+            onPress={() => setActiveTab("upcoming")}
+            activeOpacity={0.85}
+          >
+            <Ionicons
+              name="sparkles-outline"
+              size={16}
+              color={
+                activeTab === "upcoming"
+                  ? COLORS.white
+                  : COLORS.blue
+              }
+            />
+
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "upcoming" &&
+                  styles.activeTabText,
+              ]}
+            >
+              Available
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.tab,
+              activeTab === "completed" && styles.activeTab,
+            ]}
+            onPress={() => setActiveTab("completed")}
+            activeOpacity={0.85}
+          >
+            <Ionicons
+              name="checkmark-circle-outline"
+              size={16}
+              color={
+                activeTab === "completed"
+                  ? COLORS.white
+                  : COLORS.blue
+              }
+            />
+
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === "completed" &&
+                  styles.activeTabText,
+              ]}
+            >
+              Completed
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.introContent}>
-          <Text style={styles.introTitle}>
-            Serve Humanity
-          </Text>
+        {/* =================================================
+            PROGRAM CARDS
+            ================================================= */}
 
-          <Text style={styles.introText}>
-            Explore Alkhidmat programs and contribute to
-            meaningful community service.
-          </Text>
-        </View>
-      </View>
-
-      {/* TABS */}
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === "upcoming" &&
-              styles.activeTab,
-          ]}
-          onPress={() => setActiveTab("upcoming")}
-          activeOpacity={0.85}
-        >
-          <Ionicons
-            name="calendar-outline"
-            size={16}
-            color={
-              activeTab === "upcoming"
-                ? "#FFFFFF"
-                : BRAND_BLUE
-            }
-          />
-
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "upcoming" &&
-                styles.activeTabText,
-            ]}
-          >
-            Upcoming
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            activeTab === "completed" &&
-              styles.activeTab,
-          ]}
-          onPress={() => setActiveTab("completed")}
-          activeOpacity={0.85}
-        >
-          <Ionicons
-            name="checkmark-circle-outline"
-            size={16}
-            color={
-              activeTab === "completed"
-                ? "#FFFFFF"
-                : BRAND_BLUE
-            }
-          />
-
-          <Text
-            style={[
-              styles.tabText,
-              activeTab === "completed" &&
-                styles.activeTabText,
-            ]}
-          >
-            Completed
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* PROGRAM LIST */}
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
         {displayedEvents.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
               <Ionicons
                 name="checkmark-done-outline"
                 size={38}
-                color={BRAND_BLUE}
+                color={COLORS.blue}
               />
             </View>
 
             <Text style={styles.emptyTitle}>
-              No completed events
+              No completed events yet
             </Text>
 
             <Text style={styles.emptyText}>
-              Your completed volunteering activities will
-              appear here.
+              Your completed volunteering activities
+              will appear here.
             </Text>
+
+            <TouchableOpacity
+              style={styles.emptyButton}
+              onPress={() => setActiveTab("upcoming")}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.emptyButtonText}>
+                Explore Programs
+              </Text>
+
+              <Ionicons
+                name="arrow-forward"
+                size={16}
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
           </View>
         ) : (
           displayedEvents.map((event, index) => (
             <TouchableOpacity
               key={event.id}
-              style={styles.eventCard}
-              activeOpacity={0.88}
+              style={[
+                styles.eventCard,
+                event.featured && styles.featuredCard,
+              ]}
+              activeOpacity={0.9}
               onPress={() =>
                 openOfficialProgram(event.officialUrl)
               }
             >
-              {/* LEFT COLOR LINE */}
-              <View
-                style={[
-                  styles.leftLine,
-                  {
-                    backgroundColor: event.iconColor,
-                  },
-                ]}
-              />
+              {/* Featured glow / accent */}
+              {event.featured && (
+                <View style={styles.featuredTop}>
+                  <Ionicons
+                    name="star"
+                    size={11}
+                    color="#C38D12"
+                  />
 
-              {/* PROGRAM ICON */}
-              <View
-                style={[
-                  styles.eventIcon,
-                  {
-                    backgroundColor:
-                      event.iconBackground,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={event.icon}
-                  size={31}
-                  color={event.iconColor}
-                />
-              </View>
+                  <Text style={styles.featuredTopText}>
+                    PRIORITY PROGRAM
+                  </Text>
+                </View>
+              )}
 
-              {/* INFORMATION */}
-              <View style={styles.eventInfo}>
-                <View style={styles.titleRow}>
+              <View style={styles.cardMainRow}>
+                {/* Icon */}
+                <View
+                  style={[
+                    styles.eventIcon,
+                    {
+                      backgroundColor:
+                        event.iconBackground,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={event.icon}
+                    size={29}
+                    color={event.iconColor}
+                  />
+                </View>
+
+                {/* Content */}
+                <View style={styles.eventInfo}>
+                  <View style={styles.titleRow}>
+                    <Text
+                      style={styles.eventTitle}
+                      numberOfLines={2}
+                    >
+                      {event.title}
+                    </Text>
+
+                    <View style={styles.arrowBox}>
+                      <Ionicons
+                        name="arrow-up-right"
+                        size={16}
+                        color={COLORS.blue}
+                      />
+                    </View>
+                  </View>
+
                   <Text
-                    style={styles.eventTitle}
-                    numberOfLines={2}
+                    style={styles.description}
+                    numberOfLines={3}
                   >
-                    {event.title}
+                    {event.subtitle}
                   </Text>
 
-                  {index === 0 && (
-                    <View
-                      style={styles.featuredBadge}
-                    >
+                  {/* Details */}
+                  <View style={styles.detailsRow}>
+                    <View style={styles.detailChip}>
                       <Ionicons
-                        name="star-outline"
-                        size={10}
-                        color={BRAND_BLUE}
+                        name="pricetag-outline"
+                        size={12}
+                        color={COLORS.muted}
                       />
 
                       <Text
-                        style={styles.featuredText}
+                        style={styles.detailText}
+                        numberOfLines={1}
                       >
-                        Featured
+                        {event.category}
                       </Text>
                     </View>
-                  )}
-                </View>
 
-                <Text
-                  style={styles.description}
-                  numberOfLines={2}
-                >
-                  {event.subtitle}
-                </Text>
+                    <View style={styles.detailChip}>
+                      <Ionicons
+                        name="location-outline"
+                        size={12}
+                        color={COLORS.muted}
+                      />
 
-                <View style={styles.detailsRow}>
-                  <View style={styles.detail}>
-                    <Ionicons
-                      name="pricetag-outline"
-                      size={13}
-                      color={MUTED}
-                    />
-
-                    <Text
-                      style={styles.detailText}
-                    >
-                      {event.category}
-                    </Text>
+                      <Text style={styles.detailText}>
+                        {event.location}
+                      </Text>
+                    </View>
                   </View>
-
-                  <View style={styles.detail}>
-                    <Ionicons
-                      name="location-outline"
-                      size={13}
-                      color={MUTED}
-                    />
-
-                    <Text
-                      style={styles.detailText}
-                    >
-                      {event.location}
-                    </Text>
-                  </View>
-                </View>
-
-                <View style={styles.bottomRow}>
-                  <View
-                    style={styles.availableBadge}
-                  >
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={13}
-                      color="#16803C"
-                    />
-
-                    <Text
-                      style={styles.availableText}
-                    >
-                      Available
-                    </Text>
-                  </View>
-
-                  <Text style={styles.viewProgram}>
-                    View Program
-                  </Text>
                 </View>
               </View>
 
-              {/* ARROW */}
-              <View style={styles.arrowBox}>
+              {/* Bottom card action */}
+              <View style={styles.cardFooter}>
+                <View style={styles.availableBadge}>
+                  <View style={styles.availableDot} />
+
+                  <Text style={styles.availableText}>
+                    Open for Volunteers
+                  </Text>
+                </View>
+
+                <Text style={styles.viewProgram}>
+                  Official Program
+                </Text>
+
                 <Ionicons
                   name="chevron-forward"
-                  size={18}
-                  color={BRAND_BLUE}
+                  size={15}
+                  color={COLORS.blue}
                 />
               </View>
             </TouchableOpacity>
           ))
         )}
+
+        {/* =================================================
+            MOTIVATION CARD
+            ================================================= */}
+
+        <View style={styles.motivationCard}>
+          <View style={styles.motivationIcon}>
+            <Ionicons
+              name="hand-left-outline"
+              size={24}
+              color={COLORS.white}
+            />
+          </View>
+
+          <View style={styles.motivationContent}>
+            <Text style={styles.motivationTitle}>
+              Serve With Purpose
+            </Text>
+
+            <Text style={styles.motivationText}>
+              Every volunteer action can become a
+              positive change in someone's life.
+            </Text>
+          </View>
+
+          <Ionicons
+            name="arrow-forward-circle-outline"
+            size={25}
+            color="#8DAFFF"
+          />
+        </View>
+
+        <Text style={styles.footerText}>
+          Alkhidmat Volunteer Network
+        </Text>
       </ScrollView>
 
-      {/* BOTTOM NAVIGATION */}
+      {/* =================================================
+          BOTTOM NAVIGATION
+          ================================================= */}
+
       <View style={styles.bottomNav}>
         {/* HOME */}
         <TouchableOpacity
@@ -458,7 +580,7 @@ export default function MyEventsScreen() {
         <TouchableOpacity
           style={styles.navItem}
           onPress={() =>
-            navigateTo("/flagship-program")
+            navigateTo("/event-hackathon")
           }
           activeOpacity={0.75}
         >
@@ -482,7 +604,7 @@ export default function MyEventsScreen() {
             <Ionicons
               name="calendar"
               size={20}
-              color={BRAND_BLUE}
+              color={COLORS.blue}
             />
           </View>
 
@@ -548,128 +670,214 @@ export default function MyEventsScreen() {
   );
 }
 
+/* =========================================================
+   STYLES
+   ========================================================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFE",
+    backgroundColor: COLORS.background,
   },
 
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
+  pageContent: {
+    paddingBottom: 24,
+  },
+
+  /* ================= HERO ================= */
+
+  hero: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    borderRadius: 28,
+    padding: 20,
+    minHeight: 255,
+    backgroundColor: COLORS.navy,
+    overflow: "hidden",
+  },
+
+  heroCircleOne: {
+    position: "absolute",
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    right: -70,
+    top: -75,
+    backgroundColor: "#163A78",
+    opacity: 0.7,
+  },
+
+  heroCircleTwo: {
+    position: "absolute",
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    left: -90,
+    bottom: -80,
+    backgroundColor: "#12305F",
+    opacity: 0.7,
+  },
+
+  heroTopRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
 
-  headerLeft: {
-    flex: 1,
-  },
-
-  headerTitle: {
-    fontSize: 27,
-    fontWeight: "800",
-    color: DARK_BLUE,
-  },
-
-  headerSubtitle: {
-    fontSize: 12,
-    color: MUTED,
-    marginTop: 4,
-  },
-
-  countCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EEF4FF",
-    borderWidth: 1,
-    borderColor: "#DCE7FC",
-    borderRadius: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginLeft: 8,
-  },
-
-  countIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "#FFFFFF",
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: "rgba(255,255,255,0.10)",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 7,
-  },
-
-  countLabel: {
-    fontSize: 8,
-    color: MUTED,
-    fontWeight: "600",
-  },
-
-  countNumber: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: BRAND_BLUE,
-    marginTop: 1,
-  },
-
-  introCard: {
-    marginHorizontal: 20,
-    marginBottom: 13,
-    padding: 13,
-    borderRadius: 17,
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E4EAF4",
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+
+  heroBadge: {
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#163A73",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+  },
+
+  onlineDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: "#61E294",
+    marginRight: 6,
+  },
+
+  heroBadgeText: {
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1,
+    color: "#DCE7FF",
+  },
+
+  heroIcon: {
+    width: 55,
+    height: 55,
+    borderRadius: 18,
+    backgroundColor: COLORS.blue,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 19,
+    shadowColor: "#2F6BFF",
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 5,
     },
-    elevation: 2,
+    elevation: 5,
   },
 
-  introIcon: {
-    width: 47,
-    height: 47,
-    borderRadius: 14,
-    backgroundColor: "#EAF1FF",
+  heroTitle: {
+    fontSize: 30,
+    fontWeight: "900",
+    color: COLORS.white,
+    marginTop: 12,
+    letterSpacing: -0.5,
+  },
+
+  heroSubtitle: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: "#B9C8E8",
+    marginTop: 5,
+  },
+
+  heroStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 18,
+    paddingTop: 13,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.10)",
+  },
+
+  heroStat: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  heroStatNumber: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: COLORS.white,
+  },
+
+  heroStatLabel: {
+    fontSize: 8,
+    fontWeight: "700",
+    color: "#91A5CE",
+    marginTop: 2,
+  },
+
+  statDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+
+  /* ================= SECTION ================= */
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginTop: 23,
+    marginBottom: 11,
+  },
+
+  sectionEyebrow: {
+    fontSize: 8,
+    fontWeight: "900",
+    letterSpacing: 1.1,
+    color: COLORS.blue,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: COLORS.text,
+    marginTop: 3,
+  },
+
+  programCount: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: COLORS.blueLight,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  introContent: {
-    flex: 1,
-    marginLeft: 11,
+  programCountText: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: COLORS.blue,
   },
 
-  introTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: DARK_BLUE,
-  },
-
-  introText: {
-    fontSize: 10.5,
-    color: MUTED,
-    marginTop: 3,
-    lineHeight: 15,
-  },
+  /* ================= TABS ================= */
 
   tabs: {
     flexDirection: "row",
     marginHorizontal: 20,
-    marginBottom: 13,
     padding: 4,
-    borderRadius: 14,
-    backgroundColor: "#EEF3FA",
+    marginBottom: 14,
+    borderRadius: 15,
+    backgroundColor: "#EAF0F8",
     borderWidth: 1,
-    borderColor: "#DDE6F2",
+    borderColor: "#DDE5F1",
   },
 
   tab: {
@@ -677,70 +885,89 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 9,
-    borderRadius: 10,
+    paddingVertical: 10,
+    borderRadius: 11,
   },
 
   activeTab: {
-    backgroundColor: BRAND_BLUE,
-  },
-
-  tabText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: BRAND_BLUE,
-    marginLeft: 5,
-  },
-
-  activeTabText: {
-    color: "#FFFFFF",
-  },
-
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-
-  eventCard: {
-    position: "relative",
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 17,
-    marginBottom: 11,
-    paddingVertical: 12,
-    paddingLeft: 12,
-    paddingRight: 9,
-    borderWidth: 1,
-    borderColor: "#E2E8F2",
-    shadowColor: "#163A73",
-    shadowOpacity: 0.045,
-    shadowRadius: 9,
+    backgroundColor: COLORS.blue,
+    shadowColor: COLORS.blue,
+    shadowOpacity: 0.22,
+    shadowRadius: 7,
     shadowOffset: {
       width: 0,
       height: 3,
     },
-    elevation: 2,
+    elevation: 3,
   },
 
-  leftLine: {
-    position: "absolute",
-    left: 0,
-    top: 12,
-    bottom: 12,
-    width: 3,
-    borderTopRightRadius: 3,
-    borderBottomRightRadius: 3,
+  tabText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: COLORS.blue,
+    marginLeft: 5,
+  },
+
+  activeTabText: {
+    color: COLORS.white,
+  },
+
+  /* ================= EVENT CARD ================= */
+
+  eventCard: {
+    marginHorizontal: 20,
+    marginBottom: 13,
+    padding: 14,
+    borderRadius: 20,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: "#163A73",
+    shadowOpacity: 0.055,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    elevation: 3,
+  },
+
+  featuredCard: {
+    borderColor: "#E9D69B",
+    backgroundColor: "#FFFDF7",
+  },
+
+  featuredTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: "#FFF4CF",
+    marginBottom: 10,
+  },
+
+  featuredTopText: {
+    fontSize: 7.5,
+    fontWeight: "900",
+    letterSpacing: 0.7,
+    color: "#9A7413",
+    marginLeft: 4,
+  },
+
+  cardMainRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
 
   eventIcon: {
     width: 62,
     height: 62,
-    borderRadius: 15,
+    borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 5,
-    marginRight: 11,
+    marginRight: 12,
   },
 
   eventInfo: {
@@ -750,133 +977,210 @@ const styles = StyleSheet.create({
 
   titleRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
 
   eventTitle: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: "800",
-    color: DARK_BLUE,
+    fontSize: 14.5,
+    lineHeight: 19,
+    fontWeight: "900",
+    color: COLORS.text,
+    paddingRight: 6,
   },
 
-  featuredBadge: {
-    flexDirection: "row",
+  arrowBox: {
+    width: 29,
+    height: 29,
+    borderRadius: 10,
+    backgroundColor: COLORS.blueLight,
     alignItems: "center",
-    backgroundColor: "#EEF4FF",
-    borderRadius: 6,
-    paddingHorizontal: 5,
-    paddingVertical: 3,
-    marginLeft: 5,
-  },
-
-  featuredText: {
-    fontSize: 7.5,
-    fontWeight: "800",
-    color: BRAND_BLUE,
-    marginLeft: 2,
+    justifyContent: "center",
   },
 
   description: {
     fontSize: 10.5,
-    color: MUTED,
-    lineHeight: 15,
-    marginTop: 4,
+    lineHeight: 15.5,
+    color: COLORS.muted,
+    marginTop: 5,
   },
 
   detailsRow: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
-    marginTop: 6,
+    marginTop: 8,
   },
 
-  detail: {
+  detailChip: {
     flexDirection: "row",
     alignItems: "center",
-    marginRight: 10,
-    marginBottom: 2,
+    backgroundColor: "#F5F7FB",
+    borderRadius: 7,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginRight: 6,
+    marginBottom: 3,
+    maxWidth: "75%",
   },
 
   detailText: {
-    fontSize: 9,
-    color: MUTED,
+    fontSize: 8,
+    color: COLORS.muted,
+    fontWeight: "700",
     marginLeft: 3,
   },
 
-  bottomRow: {
+  cardFooter: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 5,
+    marginTop: 13,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#EDF1F6",
   },
 
   availableBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EAF8EF",
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
+    backgroundColor: COLORS.greenLight,
+    borderRadius: 7,
+    paddingHorizontal: 7,
+    paddingVertical: 4,
+  },
+
+  availableDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.green,
+    marginRight: 4,
   },
 
   availableText: {
-    fontSize: 8.5,
-    fontWeight: "800",
-    color: "#16803C",
-    marginLeft: 3,
+    fontSize: 7.5,
+    fontWeight: "900",
+    color: COLORS.green,
   },
 
   viewProgram: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: BRAND_BLUE,
+    flex: 1,
+    textAlign: "right",
+    fontSize: 8.5,
+    fontWeight: "900",
+    color: COLORS.blue,
+    marginRight: 4,
   },
 
-  arrowBox: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#EDF3FF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 6,
-  },
+  /* ================= EMPTY ================= */
 
   emptyState: {
+    marginHorizontal: 20,
+    marginTop: 25,
+    paddingVertical: 35,
+    paddingHorizontal: 25,
+    borderRadius: 22,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 65,
-    paddingHorizontal: 30,
   },
 
   emptyIcon: {
     width: 76,
     height: 76,
     borderRadius: 38,
-    backgroundColor: "#EAF1FF",
+    backgroundColor: COLORS.blueLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 13,
   },
 
   emptyTitle: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: DARK_BLUE,
+    fontSize: 18,
+    fontWeight: "900",
+    color: COLORS.text,
   },
 
   emptyText: {
-    fontSize: 12,
-    color: MUTED,
+    fontSize: 11,
+    lineHeight: 17,
+    color: COLORS.muted,
     textAlign: "center",
     marginTop: 5,
-    lineHeight: 18,
   },
+
+  emptyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.blue,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginTop: 16,
+  },
+
+  emptyButtonText: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: COLORS.white,
+    marginRight: 7,
+  },
+
+  /* ================= MOTIVATION ================= */
+
+  motivationCard: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    padding: 14,
+    borderRadius: 19,
+    backgroundColor: COLORS.navy2,
+    flexDirection: "row",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+
+  motivationIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: COLORS.blue,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 11,
+  },
+
+  motivationContent: {
+    flex: 1,
+  },
+
+  motivationTitle: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: COLORS.white,
+  },
+
+  motivationText: {
+    fontSize: 9.5,
+    lineHeight: 14,
+    color: "#AFC0E4",
+    marginTop: 3,
+    paddingRight: 5,
+  },
+
+  footerText: {
+    textAlign: "center",
+    fontSize: 8,
+    fontWeight: "700",
+    color: "#9AA8BD",
+    marginTop: 15,
+  },
+
+  /* ================= BOTTOM NAV ================= */
 
   bottomNav: {
     minHeight: 67,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.white,
     borderTopWidth: 1,
     borderTopColor: "#E5EAF2",
     flexDirection: "row",
@@ -912,7 +1216,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 29,
     borderRadius: 9,
-    backgroundColor: "#EAF1FF",
+    backgroundColor: COLORS.blueLight,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -920,7 +1224,6 @@ const styles = StyleSheet.create({
   activeNavText: {
     fontSize: 8.5,
     fontWeight: "800",
-    color: BRAND_BLUE,
+    color: COLORS.blue,
     marginTop: 3,
-  },
-});
+   }})

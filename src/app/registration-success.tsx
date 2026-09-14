@@ -2,42 +2,73 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 
+const COLORS = {
+  navy: "#071A3A",
+  blue: "#2F6BFF",
+  gold: "#E8C56A",
+  white: "#FFFFFF",
+  background: "#F4F7FC",
+  muted: "#5A6B8C",
+  border: "#E3E7F2",
+  success: "#22C55E",
+};
+
 export default function RegistrationSuccessScreen() {
   const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.iconCircle}>
-          <Ionicons name="checkmark" size={56} color="#fff" />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* HERO */}
+        <View style={styles.hero}>
+          <View style={styles.heroCircleOne} />
+          <View style={styles.heroCircleTwo} />
+
+          <View style={styles.badge}>
+            <View style={styles.badgeDot} />
+            <Text style={styles.badgeText}>REGISTRATION CONFIRMED</Text>
+          </View>
+
+          <View style={styles.iconCircle}>
+            <Ionicons name="checkmark" size={48} color="#FFFFFF" />
+          </View>
+
+          <Text style={styles.heroTitle}>You're Registered!</Text>
+          <Text style={styles.heroSubtitle}>
+            Your registration was completed successfully.
+          </Text>
         </View>
 
-        <Text style={styles.title}>You're Registered!</Text>
-        <Text style={styles.subtitle}>
-          Your registration was completed successfully.
-        </Text>
+        {/* INFO CARD */}
+        <View style={styles.content}>
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <View style={styles.infoIconWrap}>
+                <Ionicons name="mail-outline" size={17} color={COLORS.blue} />
+              </View>
+              <Text style={styles.infoText}>
+                A confirmation has been noted for your registration.
+              </Text>
+            </View>
 
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Ionicons name="mail-outline" size={18} color="#2F6BFF" />
-            <Text style={styles.infoText}>
-              A confirmation has been noted for your registration.
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="time-outline" size={18} color="#2F6BFF" />
-            <Text style={styles.infoText}>
-              Please arrive on time with a valid ID.
-            </Text>
+            <View style={[styles.infoRow, { marginBottom: 0 }]}>
+              <View style={styles.infoIconWrap}>
+                <Ionicons name="time-outline" size={17} color={COLORS.blue} />
+              </View>
+              <Text style={styles.infoText}>
+                Please arrive on time with a valid ID.
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <TouchableOpacity
@@ -46,6 +77,7 @@ export default function RegistrationSuccessScreen() {
           activeOpacity={0.85}
         >
           <Text style={styles.primaryButtonText}>Back to Home</Text>
+          <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -63,77 +95,150 @@ export default function RegistrationSuccessScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-    justifyContent: "space-between",
+    backgroundColor: COLORS.background,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
+  },
+
+  /* HERO */
+  hero: {
+    backgroundColor: COLORS.navy,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 28,
+    paddingTop: 50,
+    paddingBottom: 46,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 28,
+    borderBottomRightRadius: 28,
+    overflow: "hidden",
+    position: "relative",
+  },
+  heroCircleOne: {
+    position: "absolute",
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    right: -80,
+    top: -80,
+    backgroundColor: "#16366F",
+    opacity: 0.6,
+  },
+  heroCircleTwo: {
+    position: "absolute",
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    left: -70,
+    bottom: -50,
+    backgroundColor: "#0E2A5B",
+  },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.10)",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
+    marginBottom: 22,
+  },
+  badgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: COLORS.gold,
+    marginRight: 7,
+  },
+  badgeText: {
+    color: COLORS.gold,
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 0.8,
   },
   iconCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: "#22C55E",
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    backgroundColor: COLORS.success,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
-    shadowColor: "#22C55E",
-    shadowOpacity: 0.35,
+    marginBottom: 20,
+    shadowColor: COLORS.success,
+    shadowOpacity: 0.4,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
     elevation: 6,
   },
-  title: {
+  heroTitle: {
     fontSize: 24,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginBottom: 10,
+    fontWeight: "900",
+    color: COLORS.white,
+    marginBottom: 8,
     textAlign: "center",
   },
-  subtitle: {
-    fontSize: 14,
-    color: "#64748B",
+  heroSubtitle: {
+    fontSize: 13,
+    color: "#C8D4ED",
     textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 24,
+    lineHeight: 19,
+  },
+
+  /* INFO CARD */
+  content: {
+    paddingHorizontal: 24,
+    marginTop: -24,
   },
   infoCard: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     padding: 18,
     shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
   },
   infoRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 12,
-    gap: 10,
+    marginBottom: 14,
+    gap: 12,
+  },
+  infoIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "#EAF1FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: "#334155",
+    color: COLORS.muted,
     lineHeight: 19,
+    marginTop: 6,
   },
+
+  /* FOOTER */
   footer: {
     paddingHorizontal: 24,
+    paddingTop: 20,
     paddingBottom: 30,
   },
   primaryButton: {
-    backgroundColor: "#2F6BFF",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.blue,
     borderRadius: 14,
     paddingVertical: 16,
-    alignItems: "center",
     marginBottom: 12,
-    shadowColor: "#2F6BFF",
+    gap: 8,
+    shadowColor: COLORS.blue,
     shadowOpacity: 0.3,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
@@ -149,7 +254,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: "#E2E8F0",
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
   },
   secondaryButtonText: {
     color: "#334155",

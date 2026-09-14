@@ -1,32 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-WebBrowser.maybeCompleteAuthSession();
-
-// Real Client ID, from Google Cloud Console (Web application type)
-const GOOGLE_WEB_CLIENT_ID =
-  '758307128837-d6mvtq49fjjfk28koi78t2ndaostf9gj.apps.googleusercontent.com';
-
-const GOOGLE_CLIENT_ID = {
-  expoClientId: GOOGLE_WEB_CLIENT_ID,
-  webClientId: GOOGLE_WEB_CLIENT_ID,
-};
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -43,45 +30,16 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [request, response, promptAsync] = Google.useAuthRequest(GOOGLE_CLIENT_ID);
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      fetchGoogleProfile(authentication?.accessToken);
-    } else if (response?.type === 'error') {
-      Alert.alert('Google Sign-Up Failed', 'Please try again.');
-    }
-  }, [response]);
-
-  const fetchGoogleProfile = async (accessToken?: string) => {
-    if (!accessToken) return;
-    try {
-      const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const profile = await res.json();
-
-      // TODO: yahan profile.email / profile.name se apna backend
-      // (Supabase / Firebase) account create karen.
-      Alert.alert(
-        'Signed up with Google',
-        `Welcome ${profile.name || ''}`,
-        [{ text: 'Continue', onPress: () => router.replace('/home' as any) }],
-      );
-    } catch {
-      Alert.alert('Error', 'Could not fetch your Google profile.');
-    }
-  };
-
+  // GOOGLE SIGN-IN
+  // Temporarily disabled until Android OAuth Client ID is configured.
   const handleGoogleSignup = () => {
-    if (!request) {
-      Alert.alert('Please wait', 'Still preparing Google Sign-In, try again in a moment.');
-      return;
-    }
-    promptAsync();
+    Alert.alert(
+      'Google Sign-In',
+      'Google Sign-In is currently being configured. Please use the normal Sign Up form for now.',
+    );
   };
 
+  // APPLE SIGN-IN
   const handleAppleSignup = async () => {
     if (Platform.OS !== 'ios') {
       Alert.alert(
@@ -99,47 +57,57 @@ export default function SignupScreen() {
         ],
       });
 
-      // TODO: yahan credential.user / credential.email se apna backend
-      // (Supabase / Firebase) account create karen.
       Alert.alert(
         'Signed up with Apple',
         `Welcome ${credential.fullName?.givenName || ''}`,
-        [{ text: 'Continue', onPress: () => router.replace('/home' as any) }],
+        [
+          {
+            text: 'Continue',
+            onPress: () => router.replace('/home' as any),
+          },
+        ],
       );
     } catch (e: any) {
       if (e.code === 'ERR_REQUEST_CANCELED') {
-        // user cancelled, do nothing
-      } else {
-        Alert.alert('Apple Sign-Up Failed', 'Please try again.');
+        return;
       }
+
+      Alert.alert('Apple Sign-Up Failed', 'Please try again.');
     }
   };
 
+  // NORMAL SIGN-UP
   const handleSignup = () => {
     if (!name.trim()) {
       Alert.alert('Required', 'Please enter your full name.');
       return;
     }
+
     if (!phone.trim()) {
       Alert.alert('Required', 'Please enter your phone number.');
       return;
     }
+
     if (!email.trim()) {
       Alert.alert('Required', 'Please enter your email address.');
       return;
     }
+
     if (!email.includes('@')) {
       Alert.alert('Invalid Email', 'Please enter a valid email address.');
       return;
     }
+
     if (!city.trim()) {
       Alert.alert('Required', 'Please enter your city.');
       return;
     }
+
     if (!password) {
       Alert.alert('Required', 'Please create a password.');
       return;
     }
+
     if (password.length < 6) {
       Alert.alert(
         'Weak Password',
@@ -147,23 +115,22 @@ export default function SignupScreen() {
       );
       return;
     }
+
     if (!confirmPassword) {
       Alert.alert('Required', 'Please confirm your password.');
       return;
     }
+
     if (password !== confirmPassword) {
       Alert.alert('Password Error', 'Passwords do not match.');
       return;
     }
 
-    /*
-      TEMPORARY:
-      Real Supabase authentication will be connected here later.
-      For now, successful signup takes the user to Login.
-    */
     Alert.alert(
       'Account Created',
-      `Your ${role === 'volunteer' ? 'volunteer' : 'organizer'} account has been created successfully.`,
+      `Your ${
+        role === 'volunteer' ? 'volunteer' : 'organizer'
+      } account has been created successfully.`,
       [
         {
           text: 'Continue',
@@ -185,46 +152,66 @@ export default function SignupScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.content}>
+
             {/* HEADER */}
             <View style={styles.header}>
               <Text style={styles.title}>Create Account</Text>
-              <Text style={styles.subtitle}>Join Alkhidmat Volunteer</Text>
+              <Text style={styles.subtitle}>
+                Join Alkhidmat Volunteer
+              </Text>
             </View>
 
             {/* SOCIAL SIGN-UP */}
             <View style={styles.socialContainer}>
+
+              {/* GOOGLE */}
               <TouchableOpacity
                 style={styles.socialButton}
                 onPress={handleGoogleSignup}
                 activeOpacity={0.8}
               >
-                <Ionicons name="logo-google" size={19} color="#DB4437" />
+                <Ionicons
+                  name="logo-google"
+                  size={19}
+                  color="#DB4437"
+                />
+
                 <Text style={styles.socialButtonText}>
                   Continue with Google
                 </Text>
               </TouchableOpacity>
 
+              {/* APPLE */}
               <TouchableOpacity
                 style={[styles.socialButton, styles.appleButton]}
                 onPress={handleAppleSignup}
                 activeOpacity={0.8}
               >
-                <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
+                <Ionicons
+                  name="logo-apple"
+                  size={20}
+                  color="#FFFFFF"
+                />
+
                 <Text style={styles.appleButtonText}>
                   Continue with Apple
                 </Text>
               </TouchableOpacity>
+
             </View>
 
             {/* DIVIDER */}
             <View style={styles.dividerRow}>
               <View style={styles.dividerLine} />
+
               <Text style={styles.dividerText}>OR</Text>
+
               <View style={styles.dividerLine} />
             </View>
 
             {/* ROLE SELECTOR */}
             <View style={styles.roleContainer}>
+
               <TouchableOpacity
                 style={[
                   styles.roleButton,
@@ -236,12 +223,18 @@ export default function SignupScreen() {
                 <Ionicons
                   name="people-outline"
                   size={18}
-                  color={role === 'volunteer' ? '#FFFFFF' : '#64748B'}
+                  color={
+                    role === 'volunteer'
+                      ? '#FFFFFF'
+                      : '#64748B'
+                  }
                 />
+
                 <Text
                   style={[
                     styles.roleText,
-                    role === 'volunteer' && styles.roleTextActive,
+                    role === 'volunteer' &&
+                      styles.roleTextActive,
                   ]}
                 >
                   Volunteer
@@ -259,24 +252,37 @@ export default function SignupScreen() {
                 <Ionicons
                   name="business-outline"
                   size={18}
-                  color={role === 'organizer' ? '#FFFFFF' : '#64748B'}
+                  color={
+                    role === 'organizer'
+                      ? '#FFFFFF'
+                      : '#64748B'
+                  }
                 />
+
                 <Text
                   style={[
                     styles.roleText,
-                    role === 'organizer' && styles.roleTextActive,
+                    role === 'organizer' &&
+                      styles.roleTextActive,
                   ]}
                 >
                   Organizer
                 </Text>
               </TouchableOpacity>
+
             </View>
 
             {/* FULL NAME */}
             <View style={styles.field}>
               <Text style={styles.label}>Full Name</Text>
+
               <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={18} color="#64748B" />
+                <Ionicons
+                  name="person-outline"
+                  size={18}
+                  color="#64748B"
+                />
+
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your full name"
@@ -291,8 +297,14 @@ export default function SignupScreen() {
             {/* EMAIL */}
             <View style={styles.field}>
               <Text style={styles.label}>Email Address</Text>
+
               <View style={styles.inputWrapper}>
-                <Ionicons name="mail-outline" size={18} color="#64748B" />
+                <Ionicons
+                  name="mail-outline"
+                  size={18}
+                  color="#64748B"
+                />
+
                 <TextInput
                   style={styles.input}
                   placeholder="you@example.com"
@@ -309,8 +321,14 @@ export default function SignupScreen() {
             {/* PHONE */}
             <View style={styles.field}>
               <Text style={styles.label}>Phone Number</Text>
+
               <View style={styles.inputWrapper}>
-                <Ionicons name="call-outline" size={18} color="#64748B" />
+                <Ionicons
+                  name="call-outline"
+                  size={18}
+                  color="#64748B"
+                />
+
                 <TextInput
                   style={styles.input}
                   placeholder="03XX-XXXXXXX"
@@ -325,8 +343,14 @@ export default function SignupScreen() {
             {/* CITY */}
             <View style={styles.field}>
               <Text style={styles.label}>City</Text>
+
               <View style={styles.inputWrapper}>
-                <Ionicons name="location-outline" size={18} color="#64748B" />
+                <Ionicons
+                  name="location-outline"
+                  size={18}
+                  color="#64748B"
+                />
+
                 <TextInput
                   style={styles.input}
                   placeholder="Your city"
@@ -341,12 +365,14 @@ export default function SignupScreen() {
             {/* PASSWORD */}
             <View style={styles.field}>
               <Text style={styles.label}>Create Password</Text>
+
               <View style={styles.inputWrapper}>
                 <Ionicons
                   name="lock-closed-outline"
                   size={18}
                   color="#64748B"
                 />
+
                 <TextInput
                   style={styles.input}
                   placeholder="Create a password"
@@ -356,12 +382,21 @@ export default function SignupScreen() {
                   onChangeText={setPassword}
                   autoCapitalize="none"
                 />
+
                 <TouchableOpacity
-                  onPress={() => setShowPassword((previous) => !previous)}
+                  onPress={() =>
+                    setShowPassword(
+                      (previous) => !previous,
+                    )
+                  }
                   activeOpacity={0.7}
                 >
                   <Ionicons
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    name={
+                      showPassword
+                        ? 'eye-off-outline'
+                        : 'eye-outline'
+                    }
                     size={19}
                     color="#64748B"
                   />
@@ -371,13 +406,17 @@ export default function SignupScreen() {
 
             {/* CONFIRM PASSWORD */}
             <View style={styles.field}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>
+                Confirm Password
+              </Text>
+
               <View style={styles.inputWrapper}>
                 <Ionicons
                   name="lock-closed-outline"
                   size={18}
                   color="#64748B"
                 />
+
                 <TextInput
                   style={styles.input}
                   placeholder="Re-enter your password"
@@ -387,15 +426,20 @@ export default function SignupScreen() {
                   onChangeText={setConfirmPassword}
                   autoCapitalize="none"
                 />
+
                 <TouchableOpacity
                   onPress={() =>
-                    setShowConfirmPassword((previous) => !previous)
+                    setShowConfirmPassword(
+                      (previous) => !previous,
+                    )
                   }
                   activeOpacity={0.7}
                 >
                   <Ionicons
                     name={
-                      showConfirmPassword ? 'eye-off-outline' : 'eye-outline'
+                      showConfirmPassword
+                        ? 'eye-off-outline'
+                        : 'eye-outline'
                     }
                     size={19}
                     color="#64748B"
@@ -410,19 +454,29 @@ export default function SignupScreen() {
               onPress={handleSignup}
               activeOpacity={0.85}
             >
-              <Text style={styles.signupButtonText}>Sign Up</Text>
+              <Text style={styles.signupButtonText}>
+                Sign Up
+              </Text>
             </TouchableOpacity>
 
             {/* LOGIN */}
             <View style={styles.loginRow}>
-              <Text style={styles.loginText}>Already have an account? </Text>
+              <Text style={styles.loginText}>
+                Already have an account?{' '}
+              </Text>
+
               <TouchableOpacity
-                onPress={() => router.push('/login' as any)}
+                onPress={() =>
+                  router.push('/login' as any)
+                }
                 activeOpacity={0.7}
               >
-                <Text style={styles.loginLink}>Login</Text>
+                <Text style={styles.loginLink}>
+                  Login
+                </Text>
               </TouchableOpacity>
             </View>
+
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -435,37 +489,45 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+
   keyboard: {
     flex: 1,
   },
+
   scroll: {
     flexGrow: 1,
     paddingHorizontal: 22,
     paddingTop: 24,
     paddingBottom: 35,
   },
+
   content: {
     width: '100%',
   },
+
   header: {
     alignItems: 'center',
     marginBottom: 22,
   },
+
   title: {
     fontSize: 26,
     fontWeight: '800',
     color: '#071A3A',
   },
+
   subtitle: {
     fontSize: 13,
     color: '#64748B',
     marginTop: 5,
     textAlign: 'center',
   },
+
   socialContainer: {
     gap: 10,
     marginBottom: 18,
   },
+
   socialButton: {
     height: 50,
     borderRadius: 11,
@@ -477,36 +539,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
   },
+
   socialButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#334155',
   },
+
   appleButton: {
     backgroundColor: '#000000',
     borderColor: '#000000',
   },
+
   appleButtonText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
   },
+
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 18,
   },
+
   dividerLine: {
     flex: 1,
     height: 1,
     backgroundColor: '#E2E8F0',
   },
+
   dividerText: {
     fontSize: 11,
     fontWeight: '700',
     color: '#94A3B8',
     marginHorizontal: 10,
   },
+
   roleContainer: {
     flexDirection: 'row',
     backgroundColor: '#F1F5F9',
@@ -514,6 +583,7 @@ const styles = StyleSheet.create({
     padding: 4,
     marginBottom: 20,
   },
+
   roleButton: {
     flex: 1,
     minHeight: 44,
@@ -523,27 +593,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 7,
   },
+
   roleButtonActive: {
     backgroundColor: '#1555B5',
   },
+
   roleText: {
     fontSize: 13,
     fontWeight: '600',
     color: '#64748B',
   },
+
   roleTextActive: {
     color: '#FFFFFF',
   },
+
   field: {
     width: '100%',
     marginBottom: 14,
   },
+
   label: {
     fontSize: 12,
     fontWeight: '600',
     color: '#334155',
     marginBottom: 6,
   },
+
   inputWrapper: {
     width: '100%',
     height: 52,
@@ -555,6 +631,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+
   input: {
     flex: 1,
     height: '100%',
@@ -562,6 +639,7 @@ const styles = StyleSheet.create({
     color: '#0F172A',
     fontSize: 14,
   },
+
   signupButton: {
     width: '100%',
     height: 52,
@@ -571,21 +649,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 6,
   },
+
   signupButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
   },
+
   loginRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20,
   },
+
   loginText: {
     color: '#64748B',
     fontSize: 13,
   },
+
   loginLink: {
     color: '#1555B5',
     fontSize: 13,
