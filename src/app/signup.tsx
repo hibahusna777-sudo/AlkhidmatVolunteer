@@ -3,15 +3,15 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -31,11 +31,12 @@ export default function SignupScreen() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // GOOGLE SIGN-IN
-  // Temporarily disabled until Android OAuth Client ID is configured.
+  // Safe demo action until a Google OAuth Client ID is configured.
+  // This does not crash Expo Go and does not pretend that authentication succeeded.
   const handleGoogleSignup = () => {
     Alert.alert(
       'Google Sign-In',
-      'Google Sign-In is currently being configured. Please use the normal Sign Up form for now.',
+      'Google Sign-In needs Google OAuth configuration before it can be activated. You can create your account using the form below.',
     );
   };
 
@@ -43,13 +44,23 @@ export default function SignupScreen() {
   const handleAppleSignup = async () => {
     if (Platform.OS !== 'ios') {
       Alert.alert(
-        'iOS Only',
-        'Apple Sign-In only works on iOS devices with a development build, not on Android or Expo Go on Android.',
+        'Apple Sign-In',
+        'Apple Sign-In is available on iOS. On Android and Expo Go, please use the normal Sign Up form.',
       );
       return;
     }
 
     try {
+      const available = await AppleAuthentication.isAvailableAsync();
+
+      if (!available) {
+        Alert.alert(
+          'Apple Sign-In',
+          'Apple Sign-In is not available on this device. Please use the normal Sign Up form.',
+        );
+        return;
+      }
+
       const credential = await AppleAuthentication.signInAsync({
         requestedScopes: [
           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -59,7 +70,7 @@ export default function SignupScreen() {
 
       Alert.alert(
         'Signed up with Apple',
-        `Welcome ${credential.fullName?.givenName || ''}`,
+        `Welcome ${credential.fullName?.givenName || 'Volunteer'}`,
         [
           {
             text: 'Continue',
@@ -68,11 +79,14 @@ export default function SignupScreen() {
         ],
       );
     } catch (e: any) {
-      if (e.code === 'ERR_REQUEST_CANCELED') {
+      if (e?.code === 'ERR_REQUEST_CANCELED') {
         return;
       }
 
-      Alert.alert('Apple Sign-Up Failed', 'Please try again.');
+      Alert.alert(
+        'Apple Sign-In',
+        'Apple Sign-In could not be completed. Please use the normal Sign Up form.',
+      );
     }
   };
 
@@ -153,11 +167,29 @@ export default function SignupScreen() {
         >
           <View style={styles.content}>
 
+            {/* HERO */}
+            <View style={styles.hero}>
+              <View style={styles.heroGlowOne} />
+              <View style={styles.heroGlowTwo} />
+
+              <View style={styles.heroIcon}>
+                <Ionicons name="people" size={27} color="#FFFFFF" />
+              </View>
+
+              <View style={styles.heroTextBlock}>
+                <Text style={styles.heroBadge}>ALKHIDMAT VOLUNTEER</Text>
+                <Text style={styles.heroTitle}>Create your account</Text>
+                <Text style={styles.heroSubtitle}>
+                  Join a community making a real difference through service.
+                </Text>
+              </View>
+            </View>
+
             {/* HEADER */}
             <View style={styles.header}>
-              <Text style={styles.title}>Create Account</Text>
+              <Text style={styles.title}>Choose how to continue</Text>
               <Text style={styles.subtitle}>
-                Join Alkhidmat Volunteer
+                Use a social account or complete the form below
               </Text>
             </View>
 
@@ -487,7 +519,7 @@ export default function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F4F7FC',
   },
 
   keyboard: {
@@ -496,13 +528,86 @@ const styles = StyleSheet.create({
 
   scroll: {
     flexGrow: 1,
-    paddingHorizontal: 22,
-    paddingTop: 24,
+    paddingHorizontal: 18,
+    paddingTop: 14,
     paddingBottom: 35,
   },
 
   content: {
     width: '100%',
+  },
+
+  hero: {
+    minHeight: 178,
+    borderRadius: 24,
+    backgroundColor: '#0D2B63',
+    paddingHorizontal: 22,
+    paddingVertical: 22,
+    marginBottom: 22,
+    overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'flex-end',
+  },
+
+  heroGlowOne: {
+    position: 'absolute',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: '#2F6BFF',
+    opacity: 0.20,
+    right: -55,
+    top: -65,
+  },
+
+  heroGlowTwo: {
+    position: 'absolute',
+    width: 105,
+    height: 105,
+    borderRadius: 53,
+    backgroundColor: '#E8C56A',
+    opacity: 0.13,
+    left: -45,
+    bottom: -48,
+  },
+
+  heroIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    backgroundColor: '#2F6BFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+  },
+
+  heroTextBlock: {
+    width: '100%',
+  },
+
+  heroBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    color: '#E8C56A',
+    marginBottom: 5,
+  },
+
+  heroTitle: {
+    fontSize: 25,
+    lineHeight: 31,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+
+  heroSubtitle: {
+    fontSize: 12,
+    lineHeight: 18,
+    color: '#D7E2FA',
+    marginTop: 5,
+    maxWidth: 310,
   },
 
   header: {
@@ -524,25 +629,29 @@ const styles = StyleSheet.create({
   },
 
   socialContainer: {
+    flexDirection: 'row',
     gap: 10,
     marginBottom: 18,
   },
 
   socialButton: {
+    flex: 1,
+    minWidth: 0,
     height: 50,
-    borderRadius: 11,
+    borderRadius: 13,
     borderWidth: 1,
     borderColor: '#D9E2F0',
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 10,
+    gap: 7,
+    paddingHorizontal: 8,
   },
 
   socialButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#334155',
   },
 
@@ -552,8 +661,8 @@ const styles = StyleSheet.create({
   },
 
   appleButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
 

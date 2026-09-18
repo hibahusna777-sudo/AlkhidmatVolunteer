@@ -43,8 +43,8 @@ type ProfileData = {
 };
 
 const DEFAULT_PROFILE: ProfileData = {
-  name: "Ayesha Khan",
-  email: "ayesha.khan@example.com",
+  name: "Husna Ahmad ",
+  email: "hibahusna777@gmail.com",
   phone: "",
   city: "",
 };

@@ -2,7 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Linking,
+  Modal,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -30,10 +33,6 @@ interface EventItem {
 
 /* =========================================================
    ALKHIDMAT PROGRAMS
-   IMPORTANT:
-   1. Islamic Microfinance / Mawakhat
-   2. Community Services
-   3. Volunteer Management
    ========================================================= */
 
 const EVENTS: EventItem[] = [
@@ -138,15 +137,24 @@ const COLORS = {
   greenLight: "#EAF8EF",
 };
 
+const USER_NAME = "Wania";
+const USER_ROLE = "Volunteer";
+
 export default function MyEventsScreen() {
   const router = useRouter();
 
   const [activeTab, setActiveTab] =
     useState<EventStatus>("upcoming");
 
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const displayedEvents = EVENTS.filter(
     (event) => event.status === activeTab
   );
+
+  /* =========================================================
+     OFFICIAL PROGRAM
+     ========================================================= */
 
   const openOfficialProgram = async (url: string) => {
     try {
@@ -155,20 +163,115 @@ export default function MyEventsScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        console.log("URL cannot be opened:", url);
+        Alert.alert(
+          "Unable to Open",
+          "The official program page could not be opened."
+        );
       }
-    } catch (error) {
-      console.log("Unable to open official program:", error);
+    } catch {
+      Alert.alert(
+        "Unable to Open",
+        "Something went wrong while opening the official program."
+      );
     }
   };
 
+  /* =========================================================
+     NAVIGATION
+     ========================================================= */
+
   const navigateTo = (route: string) => {
+    setMenuOpen(false);
+
     try {
       router.push(route as any);
     } catch (error) {
       console.log("Navigation error:", error);
     }
   };
+
+  /* =========================================================
+     PROFILE MENU
+     ========================================================= */
+
+  const openProfile = () => {
+    setMenuOpen(false);
+    router.push("/profile" as any);
+  };
+
+  const openSettings = () => {
+    setMenuOpen(false);
+    router.push("/settings" as any);
+  };
+
+  const openSeniorVolunteers = () => {
+    setMenuOpen(false);
+    router.push("/senior-volunteers" as any);
+  };
+
+  const openHelp = () => {
+    setMenuOpen(false);
+    router.push("/help-support" as any);
+  };
+
+  const handleLogout = () => {
+    setMenuOpen(false);
+
+    setTimeout(() => {
+      Alert.alert(
+        "Logout",
+        "Are you sure you want to logout?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Logout",
+            style: "destructive",
+            onPress: () => {
+              router.replace("/login" as any);
+            },
+          },
+        ]
+      );
+    }, 200);
+  };
+
+  /* =========================================================
+     PROFILE DROPDOWN ITEMS
+     ========================================================= */
+
+  const menuItems = [
+    {
+      key: "profile",
+      icon: "person-outline" as const,
+      label: "My Profile",
+      onPress: openProfile,
+      highlighted: false,
+    },
+    {
+      key: "settings",
+      icon: "settings-outline" as const,
+      label: "Settings",
+      onPress: openSettings,
+      highlighted: false,
+    },
+    {
+      key: "senior",
+      icon: "people-circle-outline" as const,
+      label: "Senior Volunteers",
+      onPress: openSeniorVolunteers,
+      highlighted: true,
+    },
+    {
+      key: "help",
+      icon: "help-circle-outline" as const,
+      label: "Help & Support",
+      onPress: openHelp,
+      highlighted: false,
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -182,10 +285,15 @@ export default function MyEventsScreen() {
 
         <View style={styles.hero}>
           {/* Decorative circles */}
+
           <View style={styles.heroCircleOne} />
           <View style={styles.heroCircleTwo} />
 
+          {/* HERO TOP ROW */}
+
           <View style={styles.heroTopRow}>
+            {/* BACK BUTTON */}
+
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}
@@ -198,14 +306,48 @@ export default function MyEventsScreen() {
               />
             </TouchableOpacity>
 
-            <View style={styles.heroBadge}>
-              <View style={styles.onlineDot} />
+            {/* Wania PROFILE DROPDOWN */}
 
-              <Text style={styles.heroBadgeText}>
-                VOLUNTEER HUB
-              </Text>
-            </View>
+            <TouchableOpacity
+              style={styles.profileChip}
+              onPress={() => setMenuOpen(true)}
+              activeOpacity={0.85}
+            >
+              <View style={styles.profileAvatar}>
+                <Text style={styles.profileAvatarText}>
+                  {USER_NAME.charAt(0)}
+                </Text>
+              </View>
+
+              <View style={styles.profileTextArea}>
+                <Text style={styles.profileName}>
+                  {USER_NAME}
+                </Text>
+
+                <Text style={styles.profileRole}>
+                  {USER_ROLE}
+                </Text>
+              </View>
+
+              <Ionicons
+                name="chevron-down"
+                size={15}
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
           </View>
+
+          {/* HERO BADGE */}
+
+          <View style={styles.heroBadge}>
+            <View style={styles.onlineDot} />
+
+            <Text style={styles.heroBadgeText}>
+              VOLUNTEER HUB
+            </Text>
+          </View>
+
+          {/* HERO ICON */}
 
           <View style={styles.heroIcon}>
             <Ionicons
@@ -221,8 +363,11 @@ export default function MyEventsScreen() {
 
           <Text style={styles.heroSubtitle}>
             Discover programs, serve communities
-            {"\n"}and make a meaningful difference.
+            {"\n"}
+            and make a meaningful difference.
           </Text>
+
+          {/* HERO STATS */}
 
           <View style={styles.heroStats}>
             <View style={styles.heroStat}>
@@ -239,9 +384,11 @@ export default function MyEventsScreen() {
 
             <View style={styles.heroStat}>
               <Text style={styles.heroStatNumber}>
-                {EVENTS.filter(
-                  (event) => event.status === "upcoming"
-                ).length}
+                {
+                  EVENTS.filter(
+                    (event) => event.status === "upcoming"
+                  ).length
+                }
               </Text>
 
               <Text style={styles.heroStatLabel}>
@@ -295,7 +442,8 @@ export default function MyEventsScreen() {
           <TouchableOpacity
             style={[
               styles.tab,
-              activeTab === "upcoming" && styles.activeTab,
+              activeTab === "upcoming" &&
+                styles.activeTab,
             ]}
             onPress={() => setActiveTab("upcoming")}
             activeOpacity={0.85}
@@ -324,7 +472,8 @@ export default function MyEventsScreen() {
           <TouchableOpacity
             style={[
               styles.tab,
-              activeTab === "completed" && styles.activeTab,
+              activeTab === "completed" &&
+                styles.activeTab,
             ]}
             onPress={() => setActiveTab("completed")}
             activeOpacity={0.85}
@@ -391,7 +540,7 @@ export default function MyEventsScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          displayedEvents.map((event, index) => (
+          displayedEvents.map((event) => (
             <TouchableOpacity
               key={event.id}
               style={[
@@ -403,7 +552,8 @@ export default function MyEventsScreen() {
                 openOfficialProgram(event.officialUrl)
               }
             >
-              {/* Featured glow / accent */}
+              {/* FEATURED */}
+
               {event.featured && (
                 <View style={styles.featuredTop}>
                   <Ionicons
@@ -419,7 +569,8 @@ export default function MyEventsScreen() {
               )}
 
               <View style={styles.cardMainRow}>
-                {/* Icon */}
+                {/* ICON */}
+
                 <View
                   style={[
                     styles.eventIcon,
@@ -436,7 +587,8 @@ export default function MyEventsScreen() {
                   />
                 </View>
 
-                {/* Content */}
+                {/* CONTENT */}
+
                 <View style={styles.eventInfo}>
                   <View style={styles.titleRow}>
                     <Text
@@ -448,7 +600,7 @@ export default function MyEventsScreen() {
 
                     <View style={styles.arrowBox}>
                       <Ionicons
-                        name="arrow-up-right"
+                        name="chevron-forward"
                         size={16}
                         color={COLORS.blue}
                       />
@@ -462,7 +614,8 @@ export default function MyEventsScreen() {
                     {event.subtitle}
                   </Text>
 
-                  {/* Details */}
+                  {/* DETAILS */}
+
                   <View style={styles.detailsRow}>
                     <View style={styles.detailChip}>
                       <Ionicons
@@ -494,7 +647,8 @@ export default function MyEventsScreen() {
                 </View>
               </View>
 
-              {/* Bottom card action */}
+              {/* CARD FOOTER */}
+
               <View style={styles.cardFooter}>
                 <View style={styles.availableBadge}>
                   <View style={styles.availableDot} />
@@ -555,11 +709,145 @@ export default function MyEventsScreen() {
       </ScrollView>
 
       {/* =================================================
+          PROFILE DROPDOWN
+          ================================================= */}
+
+      <Modal
+        visible={menuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuOpen(false)}
+      >
+        <View style={styles.modalContainer}>
+          {/* BACKDROP */}
+
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={() => setMenuOpen(false)}
+          />
+
+          {/* DROPDOWN */}
+
+          <View style={styles.dropdown}>
+            {/* USER HEADER */}
+
+            <View style={styles.dropdownHeader}>
+              <View style={styles.dropdownAvatar}>
+                <Text style={styles.dropdownAvatarText}>
+                  {USER_NAME.charAt(0)}
+                </Text>
+              </View>
+
+              <View style={styles.dropdownUserInfo}>
+                <Text style={styles.dropdownName}>
+                  {USER_NAME}
+                </Text>
+
+                <Text style={styles.dropdownRole}>
+                  {USER_ROLE}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setMenuOpen(false)}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name="close"
+                  size={17}
+                  color="#64748B"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.dropdownDivider} />
+
+            {/* MENU ITEMS */}
+
+            {menuItems.map((item) => (
+              <TouchableOpacity
+                key={item.key}
+                style={[
+                  styles.dropdownItem,
+                  item.highlighted &&
+                    styles.dropdownItemActive,
+                ]}
+                onPress={item.onPress}
+                activeOpacity={0.75}
+              >
+                <View
+                  style={[
+                    styles.menuIconBox,
+                    item.highlighted &&
+                      styles.menuIconBoxActive,
+                  ]}
+                >
+                  <Ionicons
+                    name={item.icon}
+                    size={18}
+                    color={
+                      item.highlighted
+                        ? COLORS.blue
+                        : "#475569"
+                    }
+                  />
+                </View>
+
+                <Text
+                  style={[
+                    styles.dropdownItemText,
+                    item.highlighted &&
+                      styles.dropdownItemTextActive,
+                  ]}
+                >
+                  {item.label}
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={14}
+                  color={
+                    item.highlighted
+                      ? COLORS.blue
+                      : "#94A3B8"
+                  }
+                />
+              </TouchableOpacity>
+            ))}
+
+            <View style={styles.dropdownDivider} />
+
+            {/* LOGOUT */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={handleLogout}
+              activeOpacity={0.75}
+            >
+              <View style={styles.menuIconBoxLogout}>
+                <Ionicons
+                  name="log-out-outline"
+                  size={18}
+                  color="#EF4444"
+                />
+              </View>
+
+              <Text style={styles.logoutText}>
+                Logout
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* =================================================
           BOTTOM NAVIGATION
           ================================================= */}
 
       <View style={styles.bottomNav}>
         {/* HOME */}
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigateTo("/home")}
@@ -577,6 +865,7 @@ export default function MyEventsScreen() {
         </TouchableOpacity>
 
         {/* PROGRAMS */}
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() =>
@@ -596,6 +885,7 @@ export default function MyEventsScreen() {
         </TouchableOpacity>
 
         {/* MY EVENTS */}
+
         <TouchableOpacity
           style={styles.navItem}
           activeOpacity={0.75}
@@ -614,6 +904,7 @@ export default function MyEventsScreen() {
         </TouchableOpacity>
 
         {/* NEARBY */}
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigateTo("/nearby")}
@@ -631,6 +922,7 @@ export default function MyEventsScreen() {
         </TouchableOpacity>
 
         {/* CERTIFICATES */}
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() =>
@@ -650,6 +942,7 @@ export default function MyEventsScreen() {
         </TouchableOpacity>
 
         {/* PROFILE */}
+
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => navigateTo("/profile")}
@@ -735,9 +1028,61 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.12)",
   },
 
+  /* ================= PROFILE CHIP ================= */
+
+  profileChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    minWidth: 135,
+    paddingLeft: 5,
+    paddingRight: 10,
+    paddingVertical: 5,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.14)",
+  },
+
+  profileAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  profileAvatarText: {
+    fontSize: 14,
+    fontWeight: "900",
+    color: COLORS.blue,
+  },
+
+  profileTextArea: {
+    flex: 1,
+    marginLeft: 7,
+  },
+
+  profileName: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: COLORS.white,
+  },
+
+  profileRole: {
+    fontSize: 8,
+    fontWeight: "600",
+    color: "#C8D5EE",
+    marginTop: 1,
+  },
+
+  /* ================= HERO BADGE ================= */
+
   heroBadge: {
     flexDirection: "row",
     alignItems: "center",
+    alignSelf: "flex-end",
+    marginTop: 12,
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 20,
@@ -768,7 +1113,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.blue,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 19,
+    marginTop: 15,
     shadowColor: "#2F6BFF",
     shadowOpacity: 0.35,
     shadowRadius: 12,
@@ -1176,6 +1521,148 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
 
+  /* ================= PROFILE MODAL ================= */
+
+  modalContainer: {
+    flex: 1,
+  },
+
+  modalBackdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(6, 20, 46, 0.35)",
+  },
+
+  dropdown: {
+    position: "absolute",
+    top: 72,
+    right: 18,
+    width: 245,
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#E7ECF4",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    elevation: 10,
+  },
+
+  dropdownHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+
+  dropdownAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: COLORS.blueLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dropdownAvatarText: {
+    fontSize: 17,
+    fontWeight: "900",
+    color: COLORS.blue,
+  },
+
+  dropdownUserInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+
+  dropdownName: {
+    fontSize: 15,
+    fontWeight: "900",
+    color: COLORS.text,
+  },
+
+  dropdownRole: {
+    fontSize: 10,
+    color: COLORS.muted,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: "#F5F7FB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dropdownDivider: {
+    height: 1,
+    backgroundColor: "#EDF1F6",
+    marginVertical: 6,
+  },
+
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    marginHorizontal: 6,
+    borderRadius: 12,
+  },
+
+  dropdownItemActive: {
+    backgroundColor: COLORS.blueLight,
+  },
+
+  menuIconBox: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "#F5F7FB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  menuIconBoxActive: {
+    backgroundColor: "#DCE7FF",
+  },
+
+  menuIconBoxLogout: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "#FFF0F0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dropdownItemText: {
+    flex: 1,
+    fontSize: 12.5,
+    fontWeight: "700",
+    color: "#334155",
+    marginLeft: 10,
+  },
+
+  dropdownItemTextActive: {
+    color: COLORS.blue,
+    fontWeight: "900",
+  },
+
+  logoutText: {
+    flex: 1,
+    fontSize: 12.5,
+    fontWeight: "800",
+    color: "#EF4444",
+    marginLeft: 10,
+  },
+
   /* ================= BOTTOM NAV ================= */
 
   bottomNav: {
@@ -1226,4 +1713,5 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: COLORS.blue,
     marginTop: 3,
-   }})
+  },
+});

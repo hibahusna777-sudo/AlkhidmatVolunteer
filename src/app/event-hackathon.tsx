@@ -1,7 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
+  Alert,
   Linking,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -23,22 +26,94 @@ const COLORS = {
   lightMuted: "#94A3B8",
   border: "#E2E8F0",
   success: "#16A34A",
+  danger: "#E14747",
 };
 
 export default function EventHackathonScreen() {
   const router = useRouter();
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-  const openMap = () => {
-    const mapUrl =
-      "https://www.google.com/maps/search/?api=1&query=Expo%20Center%20Karachi";
+  // --------------------------------------------------
+  // GOOGLE MAPS
+  // --------------------------------------------------
+  const openMap = async () => {
+    const query = encodeURIComponent("Expo Center Karachi");
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+    const fallbackUrl = `https://maps.google.com/?q=${query}`;
 
-    Linking.openURL(mapUrl).catch((error) => {
-      console.log("Map error:", error);
-    });
+    // On web, Linking.openURL can silently fail in some browsers,
+    // so open a real browser tab directly there instead.
+    if (Platform.OS === "web") {
+      if (typeof window !== "undefined") {
+        window.open(googleMapsUrl, "_blank");
+      }
+      return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(googleMapsUrl);
+      if (supported) {
+        await Linking.openURL(googleMapsUrl);
+      } else {
+        await Linking.openURL(fallbackUrl);
+      }
+    } catch (error) {
+      console.log("Google Maps error:", error);
+      try {
+        await Linking.openURL(fallbackUrl);
+      } catch (fallbackError) {
+        console.log("Google Maps fallback error:", fallbackError);
+        Alert.alert("Could not open Maps", "Please try again.");
+      }
+    }
   };
 
+  // --------------------------------------------------
+  // REGISTER
+  // --------------------------------------------------
   const handleRegister = () => {
+    setProfileMenuOpen(false);
     router.push("/register");
+  };
+
+  // --------------------------------------------------
+  // PROFILE MENU
+  // --------------------------------------------------
+  const openProfile = () => {
+    setProfileMenuOpen(false);
+    router.push("/profile");
+  };
+
+  const openMyEvents = () => {
+    setProfileMenuOpen(false);
+    router.push("/my-events");
+  };
+
+  const openSettings = () => {
+    setProfileMenuOpen(false);
+    router.push("/settings");
+  };
+
+  const openSeniorVolunteers = () => {
+    setProfileMenuOpen(false);
+    router.push("/senior-volunteers" as any);
+  };
+
+  const openHelpSupport = () => {
+    setProfileMenuOpen(false);
+    router.push("/help-support" as any);
+  };
+
+  const handleLogout = () => {
+    setProfileMenuOpen(false);
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: () => router.replace("/login" as any),
+      },
+    ]);
   };
 
   return (
@@ -64,21 +139,128 @@ export default function EventHackathonScreen() {
           <View style={styles.headerPlaceholder} />
         </View>
 
-        {/* HERO, illustrated graphic instead of a photo */}
+        {/* HERO */}
         <View style={styles.hero}>
           <View style={styles.heroCircleOne} />
           <View style={styles.heroCircleTwo} />
 
-          {/* subtle circuit-style decoration */}
           <View style={styles.circuitDot1} />
           <View style={styles.circuitDot2} />
           <View style={styles.circuitLineH} />
           <View style={styles.circuitLineV} />
 
           <View style={styles.heroTop}>
-            <View style={styles.badge}>
-              <View style={styles.badgeDot} />
-              <Text style={styles.badgeText}>FLAGSHIP PROGRAM</Text>
+            {/* PROFILE DROPDOWN */}
+            <View style={styles.profileWrapper}>
+              <TouchableOpacity
+                style={styles.profileDropdown}
+                onPress={() => setProfileMenuOpen(!profileMenuOpen)}
+                activeOpacity={0.85}
+              >
+                <View style={styles.profileAvatar}>
+                  <Ionicons name="person" size={16} color={COLORS.navy} />
+                </View>
+
+                <View style={styles.profileNameBox}>
+                  <Text style={styles.profileSmall}>Welcome</Text>
+                  <Text style={styles.profileName} numberOfLines={1}>
+                    Fatima
+                  </Text>
+                </View>
+
+                <Ionicons
+                  name={profileMenuOpen ? "chevron-up" : "chevron-down"}
+                  size={16}
+                  color={COLORS.white}
+                />
+              </TouchableOpacity>
+
+              {profileMenuOpen && (
+                <View style={styles.dropdownMenu}>
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={openProfile}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.dropdownIcon}>
+                      <Ionicons name="person-outline" size={20} color={COLORS.blue} />
+                    </View>
+                    <Text style={styles.dropdownText}>My Profile</Text>
+                    <Ionicons name="chevron-forward" size={15} color={COLORS.lightMuted} />
+                  </TouchableOpacity>
+
+                  <View style={styles.dropdownDivider} />
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={openMyEvents}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.dropdownIcon}>
+                      <Ionicons name="calendar-outline" size={20} color={COLORS.blue} />
+                    </View>
+                    <Text style={styles.dropdownText}>My Events</Text>
+                    <Ionicons name="chevron-forward" size={15} color={COLORS.lightMuted} />
+                  </TouchableOpacity>
+
+                  <View style={styles.dropdownDivider} />
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={openSettings}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.dropdownIcon}>
+                      <Ionicons name="settings-outline" size={20} color={COLORS.blue} />
+                    </View>
+                    <Text style={styles.dropdownText}>Settings</Text>
+                    <Ionicons name="chevron-forward" size={15} color={COLORS.lightMuted} />
+                  </TouchableOpacity>
+
+                  <View style={styles.dropdownDivider} />
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={openSeniorVolunteers}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.dropdownIcon}>
+                      <Ionicons name="ribbon-outline" size={20} color={COLORS.blue} />
+                    </View>
+                    <Text style={styles.dropdownText}>Senior Volunteers</Text>
+                    <Ionicons name="chevron-forward" size={15} color={COLORS.lightMuted} />
+                  </TouchableOpacity>
+
+                  <View style={styles.dropdownDivider} />
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={openHelpSupport}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.dropdownIcon}>
+                      <Ionicons name="help-circle-outline" size={20} color={COLORS.blue} />
+                    </View>
+                    <Text style={styles.dropdownText}>Help & Support</Text>
+                    <Ionicons name="chevron-forward" size={15} color={COLORS.lightMuted} />
+                  </TouchableOpacity>
+
+                  <View style={styles.dropdownDivider} />
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={handleLogout}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.dropdownIcon, styles.dropdownIconDanger]}>
+                      <Ionicons name="log-out-outline" size={20} color={COLORS.danger} />
+                    </View>
+                    <Text style={[styles.dropdownText, styles.dropdownTextDanger]}>
+                      Logout
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
             <View style={styles.heroIcon}>
@@ -87,10 +269,7 @@ export default function EventHackathonScreen() {
           </View>
 
           <Text style={styles.heroTitle}>Alibaba Hackathon</Text>
-
-          <Text style={styles.heroSubtitle}>
-            Innovation • Technology • Youth
-          </Text>
+          <Text style={styles.heroSubtitle}>Innovation • Technology • Youth</Text>
 
           <View style={styles.heroDivider} />
 
@@ -125,7 +304,7 @@ export default function EventHackathonScreen() {
           </View>
         </View>
 
-        {/* QUICK INFO */}
+        {/* EVENT INFORMATION */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Event Information</Text>
           <Text style={styles.sectionHint}>Official details</Text>
@@ -138,6 +317,7 @@ export default function EventHackathonScreen() {
             </View>
             <Text style={styles.infoLabel}>LOCATION</Text>
             <Text style={styles.infoValue}>Expo Center, Karachi</Text>
+            <Text style={styles.infoSmall}>Karachi, Pakistan</Text>
           </View>
 
           <View style={styles.infoCard}>
@@ -217,24 +397,26 @@ export default function EventHackathonScreen() {
           </View>
         </View>
 
-        {/* MAP */}
-        <TouchableOpacity style={styles.mapButton} onPress={openMap} activeOpacity={0.8}>
+        {/* GOOGLE MAPS */}
+        <TouchableOpacity style={styles.mapButton} onPress={openMap} activeOpacity={0.82}>
           <View style={styles.mapIcon}>
-            <Ionicons name="map-outline" size={20} color={COLORS.blue} />
+            <Ionicons name="navigate-outline" size={21} color={COLORS.blue} />
           </View>
 
           <View style={styles.mapTextContainer}>
             <Text style={styles.mapTitle}>Expo Center Karachi</Text>
-            <Text style={styles.mapSubtitle}>Open location in Google Maps</Text>
+            <Text style={styles.mapSubtitle}>Tap to open location in Google Maps</Text>
           </View>
 
-          <Ionicons name="open-outline" size={18} color={COLORS.blue} />
+          <View style={styles.mapArrow}>
+            <Ionicons name="open-outline" size={18} color={COLORS.blue} />
+          </View>
         </TouchableOpacity>
 
-        {/* REGISTER CARD */}
+        {/* REGISTER */}
         <View style={styles.registerCard}>
           <View style={styles.registerTop}>
-            <View>
+            <View style={styles.registerTextContainer}>
               <Text style={styles.registerTitle}>Ready to participate?</Text>
               <Text style={styles.registerSubtitle}>
                 Secure your place in this flagship event.
@@ -256,7 +438,7 @@ export default function EventHackathonScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* FOOTER, unchanged */}
+        {/* FOOTER */}
         <View style={styles.footer}>
           <Ionicons name="shield-checkmark-outline" size={16} color={COLORS.lightMuted} />
           <Text style={styles.footerText}>Powered by Alkhidmat Volunteer Platform</Text>
@@ -300,7 +482,7 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     backgroundColor: COLORS.navy,
     padding: 22,
-    overflow: "hidden",
+    overflow: "visible",
     position: "relative",
     shadowColor: "#071A3A",
     shadowOpacity: 0.2,
@@ -366,21 +548,76 @@ const styles = StyleSheet.create({
 
   heroTop: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
+    position: "relative",
+    zIndex: 20,
   },
-  badge: {
+
+  profileWrapper: { position: "relative", zIndex: 50 },
+  profileDropdown: {
+    minWidth: 132,
+    height: 48,
+    paddingHorizontal: 8,
+    paddingRight: 11,
+    borderRadius: 15,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.10)",
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
   },
-  badgeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLORS.gold, marginRight: 7 },
-  badgeText: { color: COLORS.gold, fontSize: 9, fontWeight: "800", letterSpacing: 0.8 },
+  profileAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: COLORS.gold,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileNameBox: { flex: 1, marginLeft: 8 },
+  profileSmall: { fontSize: 8, color: "#AFC0DF", fontWeight: "600" },
+  profileName: { marginTop: 1, fontSize: 12, color: COLORS.white, fontWeight: "800" },
+
+  dropdownMenu: {
+    position: "absolute",
+    top: 55,
+    left: 0,
+    width: 210,
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    paddingVertical: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    zIndex: 100,
+  },
+  dropdownItem: {
+    minHeight: 50,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  dropdownIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: COLORS.blueLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  dropdownIconDanger: {
+    backgroundColor: "#FDEAEA",
+  },
+  dropdownText: { flex: 1, fontSize: 13, fontWeight: "700", color: COLORS.navy },
+  dropdownTextDanger: { color: COLORS.danger },
+  dropdownDivider: { height: 1, backgroundColor: COLORS.border, marginHorizontal: 10 },
+
   heroIcon: {
     width: 45,
     height: 45,
@@ -391,6 +628,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
   },
+
   heroTitle: {
     marginTop: 27,
     fontSize: 30,
@@ -497,7 +735,7 @@ const styles = StyleSheet.create({
 
   mapButton: {
     marginTop: 13,
-    minHeight: 67,
+    minHeight: 72,
     backgroundColor: COLORS.white,
     borderRadius: 17,
     borderWidth: 1,
@@ -507,16 +745,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
   },
   mapIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 13,
     backgroundColor: COLORS.blueLight,
     alignItems: "center",
     justifyContent: "center",
   },
   mapTextContainer: { flex: 1, marginLeft: 11 },
-  mapTitle: { fontSize: 12, fontWeight: "800", color: COLORS.navy },
-  mapSubtitle: { marginTop: 3, fontSize: 9, color: COLORS.muted },
+  mapTitle: { fontSize: 13, fontWeight: "800", color: COLORS.navy },
+  mapSubtitle: { marginTop: 4, fontSize: 9, color: COLORS.muted },
+  mapArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: COLORS.blueLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   registerCard: {
     marginTop: 20,
@@ -531,6 +777,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 15,
   },
+  registerTextContainer: { flex: 1, paddingRight: 10 },
   registerTitle: { fontSize: 16, fontWeight: "900", color: COLORS.white },
   registerSubtitle: { marginTop: 4, fontSize: 10, color: "#AFC0DF" },
   registerIcon: {

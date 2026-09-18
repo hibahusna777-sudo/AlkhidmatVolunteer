@@ -152,10 +152,10 @@ export default function ProfileScreen() {
               </View>
 
               <View style={styles.heroIdentity}>
-                <Text style={styles.heroName}>Ayesha Khan</Text>
+                <Text style={styles.heroName}>Samia Qadri</Text>
 
                 <Text style={styles.heroEmail}>
-                  ayesha.khan@example.com
+                  samia.qadri@example.com
                 </Text>
 
                 <View style={styles.volunteerBadge}>
