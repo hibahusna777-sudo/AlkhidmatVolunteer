@@ -30,6 +30,27 @@ export default function HomeScreen() {
     router.push("/flagship-program");
   const openHackathon = () =>
     router.push("/event-hackathon");
+  const openVideos = () => router.push("/video");
+
+  const openProfile = () => {
+    setMenuOpen(false);
+    router.push("/profile");
+  };
+
+  const openSettings = () => {
+    setMenuOpen(false);
+    router.push("/settings");
+  };
+
+  const openHelpSupport = () => {
+    setMenuOpen(false);
+    router.push("/help-support");
+  };
+
+  const openSeniorVolunteers = () => {
+    setMenuOpen(false);
+    router.push("/senior-volunteers");
+  };
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -48,17 +69,11 @@ export default function HomeScreen() {
     }
   };
 
-  // ================= COMING SOON =================
+  // ================= NOTIFICATIONS =================
 
-  const showComingSoon = (label: string) => {
+  const openNotifications = () => {
     setMenuOpen(false);
-
-    setTimeout(() => {
-      Alert.alert(
-        label,
-        `${label} is coming soon.`
-      );
-    }, 150);
+    router.push("/notifications");
   };
 
   // ================= LOGOUT =================
@@ -152,11 +167,9 @@ export default function HomeScreen() {
 
         <View style={styles.hero}>
           <View style={styles.heroContent}>
-
             {/* TOP ROW */}
 
             <View style={styles.topRow}>
-
               {/* ALKHIDMAT LOGO */}
 
               <View style={styles.logoBadge}>
@@ -170,15 +183,12 @@ export default function HomeScreen() {
               {/* RIGHT SIDE */}
 
               <View style={styles.topRightGroup}>
-
                 {/* NOTIFICATION */}
 
                 <TouchableOpacity
                   style={styles.bellButton}
                   activeOpacity={0.7}
-                  onPress={() =>
-                    showComingSoon("Notifications")
-                  }
+                  onPress={openNotifications}
                 >
                   <Ionicons
                     name="notifications-outline"
@@ -285,6 +295,40 @@ export default function HomeScreen() {
           </Text>
         </View>
 
+        {/* ================= VIDEOS BUTTON ================= */}
+
+        <TouchableOpacity
+          style={styles.videoButton}
+          onPress={openVideos}
+          activeOpacity={0.88}
+        >
+          <View style={styles.videoIconBox}>
+            <Ionicons
+              name="play"
+              size={17}
+              color="#FFFFFF"
+            />
+          </View>
+
+          <View style={styles.videoButtonText}>
+            <Text style={styles.videoButtonTitle}>
+              Watch Alkhidmat Videos
+            </Text>
+
+            <Text style={styles.videoButtonSubtitle}>
+              Stories, youth initiatives & community impact
+            </Text>
+          </View>
+
+          <View style={styles.videoArrow}>
+            <Ionicons
+              name="arrow-forward"
+              size={17}
+              color="#1857D8"
+            />
+          </View>
+        </TouchableOpacity>
+
         {/* ================= FEATURE GRID ================= */}
 
         <View style={styles.featureGrid}>
@@ -352,7 +396,6 @@ export default function HomeScreen() {
         onRequestClose={closeMenu}
       >
         <View style={styles.modalRoot}>
-
           {/* BACKDROP */}
 
           <Pressable
@@ -363,7 +406,6 @@ export default function HomeScreen() {
           {/* DROPDOWN */}
 
           <View style={styles.dropdown}>
-
             {/* HEADER */}
 
             <View style={styles.dropdownHeader}>
@@ -405,10 +447,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.dropdownItem}
               activeOpacity={0.7}
-              onPress={() => {
-                setMenuOpen(false);
-                router.push("/profile" as any);
-              }}
+              onPress={openProfile}
             >
               <Ionicons
                 name="person-outline"
@@ -434,7 +473,7 @@ export default function HomeScreen() {
               activeOpacity={0.7}
               onPress={() => {
                 setMenuOpen(false);
-                router.push("/my-events");
+                openMyEvents();
               }}
             >
               <Ionicons
@@ -457,17 +496,9 @@ export default function HomeScreen() {
             {/* SENIOR VOLUNTEERS */}
 
             <TouchableOpacity
-              style={[
-                styles.dropdownItem,
-                styles.dropdownItemActive,
-              ]}
+              style={styles.dropdownItem}
               activeOpacity={0.7}
-              onPress={() => {
-                setMenuOpen(false);
-                router.push(
-                  "/senior-volunteers" as any
-                );
-              }}
+              onPress={openSeniorVolunteers}
             >
               <Ionicons
                 name="people-circle-outline"
@@ -475,19 +506,14 @@ export default function HomeScreen() {
                 color="#1857D8"
               />
 
-              <Text
-                style={[
-                  styles.dropdownItemText,
-                  styles.dropdownItemTextActive,
-                ]}
-              >
+              <Text style={styles.dropdownItemText}>
                 Senior Volunteers
               </Text>
 
               <Ionicons
                 name="chevron-forward"
                 size={16}
-                color="#1857D8"
+                color="#94A3B8"
               />
             </TouchableOpacity>
 
@@ -496,9 +522,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.dropdownItem}
               activeOpacity={0.7}
-              onPress={() =>
-                showComingSoon("Settings")
-              }
+              onPress={openSettings}
             >
               <Ionicons
                 name="settings-outline"
@@ -517,14 +541,12 @@ export default function HomeScreen() {
               />
             </TouchableOpacity>
 
-            {/* HELP */}
+            {/* HELP & SUPPORT */}
 
             <TouchableOpacity
               style={styles.dropdownItem}
               activeOpacity={0.7}
-              onPress={() =>
-                showComingSoon("Help & Support")
-              }
+              onPress={openHelpSupport}
             >
               <Ionicons
                 name="help-circle-outline"
@@ -833,20 +855,11 @@ const styles = StyleSheet.create({
     gap: 11,
   },
 
-  dropdownItemActive: {
-    backgroundColor: "#EAF0FF",
-  },
-
   dropdownItemText: {
     flex: 1,
     fontSize: 13,
     fontWeight: "600",
     color: "#334155",
-  },
-
-  dropdownItemTextActive: {
-    color: "#1857D8",
-    fontWeight: "800",
   },
 
   logoutText: {
@@ -864,7 +877,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 20,
     marginTop: 22,
-    marginBottom: 16,
+    marginBottom: 13,
   },
 
   introText: {
@@ -878,6 +891,67 @@ const styles = StyleSheet.create({
   introAccent: {
     color: "#1857D8",
     fontWeight: "800",
+  },
+
+  // ================= VIDEO BUTTON =================
+
+  videoButton: {
+    marginHorizontal: 20,
+    marginBottom: 18,
+    minHeight: 68,
+    borderRadius: 17,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#DCE5F5",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    shadowColor: "#10234B",
+    shadowOpacity: 0.07,
+    shadowRadius: 7,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    elevation: 2,
+  },
+
+  videoIconBox: {
+    width: 45,
+    height: 45,
+    borderRadius: 14,
+    backgroundColor: "#1857D8",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  videoButtonText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+
+  videoButtonTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#10234B",
+    marginBottom: 3,
+  },
+
+  videoButtonSubtitle: {
+    fontSize: 10.5,
+    color: "#64748B",
+    lineHeight: 15,
+  },
+
+  videoArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#EAF0FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
   },
 
   // ================= FEATURE GRID =================
