@@ -1,8 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Alert,
   Linking,
+  Modal,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -11,87 +15,253 @@ import {
   View,
 } from "react-native";
 
-const COLORS = {
-  navy: "#071A3A",
-  blue: "#2F6BFF",
-  blueDark: "#1746C7",
-  blueLight: "#EAF1FF",
-  white: "#FFFFFF",
-  background: "#F5F8FF",
-  text: "#10244A",
-  muted: "#71809D",
-  border: "#E2E8F5",
-  gold: "#E8C56A",
+const CURRENT_USER_KEY = "@alkhidmat_current_user";
+const PROFILE_KEY = "@alkhidmat_profile";
+
+const ROYAL_BLUE = "#1857D8";
+const DEEP_BLUE = "#071A3A";
+const MID_BLUE = "#0D2B63";
+const GOLD = "#E8C56A";
+const BG = "#F5F7FB";
+
+type User = {
+  fullName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
 };
 
-const FAQS = [
+type FAQItem = {
+  question: string;
+  answer: string;
+};
+
+const FAQS: FAQItem[] = [
   {
-    q: "How do I register for an event?",
-    a: "Open Nearby Opportunities or My Events, select the event you want to join, tap Register Now, and complete your details.",
+    question: "How can I register for an opportunity?",
+    answer:
+      "Open an opportunity from the app, review its details and tap the Register button. Your registration will be saved in your account.",
   },
   {
-    q: "How do I get my certificate?",
-    a: "After successfully completing a volunteer program, open Certificates from the app menu to view your available certificates.",
+    question: "How can I view my registered events?",
+    answer:
+      "Open My Events from the account menu or navigation area to see your upcoming and completed volunteer activities.",
   },
   {
-    q: "How do I mark my attendance?",
-    a: "Open Scan QR from the Home screen and scan the event QR code at the event location to mark your attendance.",
+    question: "How do I update my profile?",
+    answer:
+      "Open My Profile from the account menu. You can update your available profile information there.",
   },
   {
-    q: "Where can I find volunteer opportunities?",
-    a: "Open Nearby Opportunities or My Events to explore available programs, campaigns, and volunteer activities.",
+    question: "How does attendance scanning work?",
+    answer:
+      "Open the Scan section and use the event QR code when attendance scanning is available for your event.",
   },
   {
-    q: "What should I do if I have a problem?",
-    a: "You can contact our support team through email or phone. Our team will guide you with your issue.",
+    question: "How can I get my certificate?",
+    answer:
+      "After completing an eligible activity, open Certificates to create or view your volunteer certificate.",
   },
 ];
 
+function getInitials(name: string) {
+  const cleanName = name.trim();
+
+  if (!cleanName) {
+    return "V";
+  }
+
+  const parts = cleanName.split(/\s+/);
+
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
+}
+
 export default function HelpSupportScreen() {
   const router = useRouter();
-  const [openFAQ, setOpenFAQ] = useState<number | null>(0);
+
+  const [user, setUser] = useState<User | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    try {
+      const savedUser = await AsyncStorage.getItem(CURRENT_USER_KEY);
+
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
+      }
+    } catch (error) {
+      console.log("User loading error:", error);
+    }
+  };
+
+  const displayName =
+    user?.fullName?.trim() ||
+    user?.name?.trim() ||
+    "Volunteer";
+
+  const initials = getInitials(displayName);
 
   const toggleFAQ = (index: number) => {
-    setOpenFAQ(openFAQ === index ? null : index);
+    setOpenFAQ((current) => (current === index ? null : index));
   };
 
-  const openEmail = () => {
-    Linking.openURL("mailto:support@alkhidmat.org");
+  const openEmail = async () => {
+    try {
+      const url = "mailto:support@alkhidmat.org";
+
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(
+          "Email Support",
+          "Please email support@alkhidmat.org from your email app."
+        );
+      }
+    } catch {
+      Alert.alert(
+        "Email Support",
+        "Unable to open your email application."
+      );
+    }
   };
 
-  const openPhone = () => {
-    Linking.openURL("tel:+922135830009");
+  const openPhone = async () => {
+    try {
+      const url = "tel:+922135830009";
+
+      const supported = await Linking.canOpenURL(url);
+
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(
+          "Phone Support",
+          "Please call +92 21 3583 0009."
+        );
+      }
+    } catch {
+      Alert.alert(
+        "Phone Support",
+        "Unable to open the phone application."
+      );
+    }
+  };
+
+  const goProfile = () => {
+    setMenuVisible(false);
+    router.push("/profile");
+  };
+
+  const goSeniorVolunteers = () => {
+    setMenuVisible(false);
+    router.push("/senior-volunteers");
+  };
+
+  const goHome = () => {
+    setMenuVisible(false);
+    router.replace("/home");
+  };
+
+  const goMyEvents = () => {
+    setMenuVisible(false);
+    router.push("/my-events");
+  };
+
+  const showSettings = () => {
+    setMenuVisible(false);
+
+    setTimeout(() => {
+      Alert.alert(
+        "Settings",
+        "Account and app settings are available here."
+      );
+    }, 150);
+  };
+
+  const logout = () => {
+    setMenuVisible(false);
+
+    setTimeout(() => {
+      Alert.alert(
+        "Logout",
+        "Are you sure you want to logout?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Logout",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await AsyncStorage.multiRemove([
+                  CURRENT_USER_KEY,
+                  PROFILE_KEY,
+                ]);
+
+                router.replace("/login");
+              } catch (error) {
+                console.log("Logout error:", error);
+
+                Alert.alert(
+                  "Logout Error",
+                  "Unable to logout. Please try again."
+                );
+              }
+            },
+          },
+        ]
+      );
+    }, 150);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.page}>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
 
         {/* HEADER */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.back()}
+            onPress={() => router.replace("/home")}
             activeOpacity={0.8}
           >
             <Ionicons
-              name="chevron-back"
-              size={22}
-              color={COLORS.navy}
+              name="arrow-back"
+              size={23}
+              color={DEEP_BLUE}
             />
           </TouchableOpacity>
 
-          <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>
-              Help & Support
-            </Text>
+          <Text style={styles.headerTitle}>
+            Help & Support
+          </Text>
 
-            <Text style={styles.headerSubtitle}>
-              We're here to help
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => setMenuVisible(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.profileInitials}>
+              {initials}
             </Text>
-          </View>
-
-          <View style={styles.headerSpacer} />
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -99,164 +269,149 @@ export default function HelpSupportScreen() {
           contentContainerStyle={styles.scrollContent}
         >
 
-          {/* HERO CARD */}
-          <View style={styles.heroCard}>
-            <View style={styles.heroGlow} />
+          {/* HERO */}
+          <View style={styles.hero}>
+            <View style={styles.heroGlowOne} />
+            <View style={styles.heroGlowTwo} />
 
-            <View style={styles.heroIcon}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.heroIcon}>
+                <Ionicons
+                  name="headset"
+                  size={28}
+                  color={GOLD}
+                />
+              </View>
+
+              <View style={styles.heroBadge}>
+                <View style={styles.goldDot} />
+                <Text style={styles.heroBadgeText}>
+                  VOLUNTEER SUPPORT
+                </Text>
+              </View>
+            </View>
+
+            <Text style={styles.heroTitle}>
+              Need some help?
+            </Text>
+
+            <Text style={styles.heroText}>
+              We are here to help you with your volunteer
+              journey, events, profile and app experience.
+            </Text>
+
+            <View style={styles.heroBottom}>
+              <View>
+                <Text style={styles.heroWelcome}>
+                  Welcome back
+                </Text>
+                <Text style={styles.heroName}>
+                  {displayName}
+                </Text>
+              </View>
+
               <Ionicons
-                name="headset-outline"
-                size={30}
-                color={COLORS.white}
+                name="arrow-forward"
+                size={25}
+                color={GOLD}
               />
             </View>
-
-            <View style={styles.heroText}>
-              <Text style={styles.heroSmall}>
-                VOLUNTEER SUPPORT
-              </Text>
-
-              <Text style={styles.heroTitle}>
-                Need some help?
-              </Text>
-
-              <Text style={styles.heroDescription}>
-                Find quick answers or contact our support team.
-              </Text>
-            </View>
-
-            <View style={styles.goldDot} />
           </View>
 
-          {/* CONTACT SECTION */}
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>
-                Contact Support
-              </Text>
+          {/* CONTACT */}
+          <Text style={styles.sectionTitle}>
+            Contact Support
+          </Text>
 
-              <Text style={styles.sectionSubtitle}>
-                Choose how you want to reach us
-              </Text>
-            </View>
+          <View style={styles.contactRow}>
 
-            <View style={styles.sectionIcon}>
-              <Ionicons
-                name="chatbubbles-outline"
-                size={19}
-                color={COLORS.blue}
-              />
-            </View>
-          </View>
-
-          {/* EMAIL */}
-          <TouchableOpacity
-            style={styles.contactCard}
-            onPress={openEmail}
-            activeOpacity={0.85}
-          >
-            <View style={styles.contactIconBlue}>
-              <Ionicons
-                name="mail-outline"
-                size={22}
-                color={COLORS.blue}
-              />
-            </View>
-
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>
-                EMAIL SUPPORT
-              </Text>
+            <TouchableOpacity
+              style={styles.contactCard}
+              onPress={openEmail}
+              activeOpacity={0.85}
+            >
+              <View style={styles.contactIcon}>
+                <Ionicons
+                  name="mail"
+                  size={23}
+                  color={ROYAL_BLUE}
+                />
+              </View>
 
               <Text style={styles.contactTitle}>
-                Send us an email
+                Email Us
               </Text>
 
               <Text style={styles.contactValue}>
                 support@alkhidmat.org
               </Text>
-            </View>
 
-            <View style={styles.arrowCircle}>
-              <Ionicons
-                name="arrow-forward"
-                size={16}
-                color={COLORS.blue}
-              />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.contactArrow}>
+                <Ionicons
+                  name="arrow-forward"
+                  size={16}
+                  color={ROYAL_BLUE}
+                />
+              </View>
+            </TouchableOpacity>
 
-          {/* PHONE */}
-          <TouchableOpacity
-            style={styles.contactCard}
-            onPress={openPhone}
-            activeOpacity={0.85}
-          >
-            <View style={styles.contactIconGreen}>
-              <Ionicons
-                name="call-outline"
-                size={22}
-                color="#16865B"
-              />
-            </View>
-
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>
-                PHONE SUPPORT
-              </Text>
+            <TouchableOpacity
+              style={styles.contactCard}
+              onPress={openPhone}
+              activeOpacity={0.85}
+            >
+              <View style={styles.contactIcon}>
+                <Ionicons
+                  name="call"
+                  size={23}
+                  color={ROYAL_BLUE}
+                />
+              </View>
 
               <Text style={styles.contactTitle}>
-                Talk to our team
+                Call Us
               </Text>
 
               <Text style={styles.contactValue}>
                 +92 21 3583 0009
               </Text>
-            </View>
 
-            <View style={styles.arrowCircle}>
-              <Ionicons
-                name="arrow-forward"
-                size={16}
-                color={COLORS.blue}
-              />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.contactArrow}>
+                <Ionicons
+                  name="arrow-forward"
+                  size={16}
+                  color={ROYAL_BLUE}
+                />
+              </View>
+            </TouchableOpacity>
 
-          {/* FAQ HEADER */}
-          <View
-            style={[
-              styles.sectionHeader,
-              { marginTop: 28 },
-            ]}
-          >
-            <View>
-              <Text style={styles.sectionTitle}>
-                Frequently Asked Questions
-              </Text>
-
-              <Text style={styles.sectionSubtitle}>
-                Quick answers for volunteers
-              </Text>
-            </View>
-
-            <View style={styles.sectionIcon}>
-              <Ionicons
-                name="help-circle-outline"
-                size={20}
-                color={COLORS.blue}
-              />
-            </View>
           </View>
 
-          {/* FAQ LIST */}
+          {/* FAQ */}
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>
+                Frequently Asked
+              </Text>
+              <Text style={styles.sectionSubtitle}>
+                Quick answers to common questions
+              </Text>
+            </View>
+
+            <Ionicons
+              name="help-circle"
+              size={27}
+              color={ROYAL_BLUE}
+            />
+          </View>
+
           <View style={styles.faqContainer}>
             {FAQS.map((item, index) => {
               const isOpen = openFAQ === index;
 
               return (
                 <TouchableOpacity
-                  key={item.q}
+                  key={index}
                   style={[
                     styles.faqCard,
                     isOpen && styles.faqCardOpen,
@@ -265,48 +420,25 @@ export default function HelpSupportScreen() {
                   activeOpacity={0.9}
                 >
                   <View style={styles.faqTop}>
-
-                    <View
-                      style={[
-                        styles.faqNumber,
-                        isOpen && styles.faqNumberOpen,
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.faqNumberText,
-                          isOpen &&
-                            styles.faqNumberTextOpen,
-                        ]}
-                      >
+                    <View style={styles.faqNumber}>
+                      <Text style={styles.faqNumberText}>
                         {String(index + 1).padStart(2, "0")}
                       </Text>
                     </View>
 
                     <Text style={styles.faqQuestion}>
-                      {item.q}
+                      {item.question}
                     </Text>
 
-                    <View
-                      style={[
-                        styles.faqArrow,
-                        isOpen && styles.faqArrowOpen,
-                      ]}
-                    >
-                      <Ionicons
-                        name={
-                          isOpen
-                            ? "chevron-up"
-                            : "chevron-down"
-                        }
-                        size={16}
-                        color={
-                          isOpen
-                            ? COLORS.white
-                            : COLORS.muted
-                        }
-                      />
-                    </View>
+                    <Ionicons
+                      name={
+                        isOpen
+                          ? "chevron-up"
+                          : "chevron-down"
+                      }
+                      size={20}
+                      color={DEEP_BLUE}
+                    />
                   </View>
 
                   {isOpen && (
@@ -314,7 +446,7 @@ export default function HelpSupportScreen() {
                       <View style={styles.answerLine} />
 
                       <Text style={styles.faqAnswer}>
-                        {item.a}
+                        {item.answer}
                       </Text>
                     </View>
                   )}
@@ -323,266 +455,508 @@ export default function HelpSupportScreen() {
             })}
           </View>
 
-          {/* BOTTOM SUPPORT CARD */}
-          <View style={styles.bottomCard}>
+          {/* BOTTOM SUPPORT */}
+          <View style={styles.bottomSupport}>
             <View style={styles.bottomIcon}>
               <Ionicons
-                name="heart-outline"
-                size={22}
-                color={COLORS.blue}
+                name="chatbubbles"
+                size={25}
+                color={GOLD}
               />
             </View>
 
-            <View style={styles.bottomText}>
+            <View style={styles.bottomTextWrap}>
               <Text style={styles.bottomTitle}>
                 Still need help?
               </Text>
 
-              <Text style={styles.bottomDescription}>
+              <Text style={styles.bottomText}>
                 Our support team is ready to assist you.
               </Text>
             </View>
 
             <TouchableOpacity
-              style={styles.contactButton}
+              style={styles.bottomButton}
               onPress={openEmail}
               activeOpacity={0.85}
             >
-              <Text style={styles.contactButtonText}>
-                Contact
-              </Text>
+              <Ionicons
+                name="mail-outline"
+                size={18}
+                color="#FFFFFF"
+              />
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.footerText}>
-            Alkhidmat Volunteer App • Help & Support
+          <Text style={styles.footer}>
+            Alkhidmat Volunteer • Help & Support
           </Text>
 
+          <View style={{ height: 30 }} />
         </ScrollView>
+
+        {/* ACCOUNT MENU */}
+        <Modal
+          visible={menuVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => setMenuVisible(false)}
+          >
+            <Pressable
+              style={styles.menuCard}
+              onPress={(event) => event.stopPropagation()}
+            >
+
+              <View style={styles.menuHeader}>
+                <View style={styles.menuAvatar}>
+                  <Text style={styles.menuAvatarText}>
+                    {initials}
+                  </Text>
+                </View>
+
+                <View style={styles.menuUserInfo}>
+                  <Text
+                    style={styles.menuUserName}
+                    numberOfLines={1}
+                  >
+                    {displayName}
+                  </Text>
+
+                  <Text
+                    style={styles.menuUserEmail}
+                    numberOfLines={1}
+                  >
+                    {user?.email || "Volunteer Account"}
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => setMenuVisible(false)}
+                >
+                  <Ionicons
+                    name="close"
+                    size={22}
+                    color="#667085"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.menuDivider} />
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={goHome}
+              >
+                <View style={styles.menuIcon}>
+                  <Ionicons
+                    name="home-outline"
+                    size={20}
+                    color={ROYAL_BLUE}
+                  />
+                </View>
+
+                <Text style={styles.menuText}>
+                  Home
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A0A8B8"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={goProfile}
+              >
+                <View style={styles.menuIcon}>
+                  <Ionicons
+                    name="person-outline"
+                    size={20}
+                    color={ROYAL_BLUE}
+                  />
+                </View>
+
+                <Text style={styles.menuText}>
+                  My Profile
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A0A8B8"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={goMyEvents}
+              >
+                <View style={styles.menuIcon}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    color={ROYAL_BLUE}
+                  />
+                </View>
+
+                <Text style={styles.menuText}>
+                  My Events
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A0A8B8"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={goSeniorVolunteers}
+              >
+                <View style={styles.menuIcon}>
+                  <Ionicons
+                    name="people-outline"
+                    size={20}
+                    color={ROYAL_BLUE}
+                  />
+                </View>
+
+                <Text style={styles.menuText}>
+                  Senior Volunteers
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A0A8B8"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={showSettings}
+              >
+                <View style={styles.menuIcon}>
+                  <Ionicons
+                    name="settings-outline"
+                    size={20}
+                    color={ROYAL_BLUE}
+                  />
+                </View>
+
+                <Text style={styles.menuText}>
+                  Settings
+                </Text>
+
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color="#A0A8B8"
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => setMenuVisible(false)}
+              >
+                <View style={styles.menuIcon}>
+                  <Ionicons
+                    name="help-circle-outline"
+                    size={20}
+                    color={ROYAL_BLUE}
+                  />
+                </View>
+
+                <Text style={styles.menuText}>
+                  Help & Support
+                </Text>
+
+                <Ionicons
+                  name="checkmark"
+                  size={19}
+                  color={GOLD}
+                />
+              </TouchableOpacity>
+
+              <View style={styles.menuDivider} />
+
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={logout}
+              >
+                <Ionicons
+                  name="log-out-outline"
+                  size={21}
+                  color="#D92D20"
+                />
+
+                <Text style={styles.logoutText}>
+                  Logout
+                </Text>
+              </TouchableOpacity>
+
+            </Pressable>
+          </Pressable>
+        </Modal>
+
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: BG,
   },
 
-  page: {
+  container: {
     flex: 1,
-    width: "100%",
-    maxWidth: 500,
-    alignSelf: "center",
+    backgroundColor: BG,
   },
 
   header: {
-    height: 76,
-    paddingHorizontal: 18,
+    height: 72,
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: COLORS.white,
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: "#E8ECF3",
   },
 
   backButton: {
-    width: 42,
-    height: 42,
+    width: 43,
+    height: 43,
     borderRadius: 14,
-    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F2F5FA",
+  },
+
+  headerTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 19,
+    fontWeight: "800",
+    color: DEEP_BLUE,
+    marginHorizontal: 10,
+  },
+
+  profileButton: {
+    width: 43,
+    height: 43,
+    borderRadius: 14,
+    backgroundColor: ROYAL_BLUE,
     alignItems: "center",
     justifyContent: "center",
   },
 
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
-  },
-
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: COLORS.navy,
-  },
-
-  headerSubtitle: {
-    fontSize: 11,
-    color: COLORS.muted,
-    marginTop: 2,
-    fontWeight: "500",
-  },
-
-  headerSpacer: {
-    width: 42,
+  profileInitials: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "900",
   },
 
   scrollContent: {
     padding: 18,
-    paddingBottom: 35,
   },
 
-  heroCard: {
-    minHeight: 150,
-    borderRadius: 25,
+  hero: {
+    backgroundColor: DEEP_BLUE,
+    borderRadius: 28,
     padding: 22,
     overflow: "hidden",
-    backgroundColor: COLORS.navy,
+    minHeight: 255,
+    marginBottom: 25,
+  },
+
+  heroGlowOne: {
+    position: "absolute",
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: "#123B85",
+    right: -70,
+    top: -75,
+    opacity: 0.65,
+  },
+
+  heroGlowTwo: {
+    position: "absolute",
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#1857D8",
+    left: -65,
+    bottom: -55,
+    opacity: 0.28,
+  },
+
+  heroTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 25,
-    position: "relative",
-  },
-
-  heroGlow: {
-    position: "absolute",
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    right: -65,
-    top: -65,
-    backgroundColor: COLORS.blueDark,
-    opacity: 0.8,
-  },
-
-  goldDot: {
-    position: "absolute",
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    right: 28,
-    bottom: 22,
-    backgroundColor: COLORS.gold,
+    justifyContent: "space-between",
   },
 
   heroIcon: {
-    width: 62,
-    height: 62,
-    borderRadius: 20,
-    backgroundColor: COLORS.blue,
+    width: 55,
+    height: 55,
+    borderRadius: 17,
+    backgroundColor: "#102B5E",
+    borderWidth: 1,
+    borderColor: "#2C4B82",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 17,
   },
 
-  heroText: {
-    flex: 1,
+  heroBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    paddingHorizontal: 11,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
 
-  heroSmall: {
+  goldDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: GOLD,
+    marginRight: 7,
+  },
+
+  heroBadgeText: {
+    color: GOLD,
     fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.3,
-    color: COLORS.gold,
-    marginBottom: 5,
+    fontWeight: "900",
+    letterSpacing: 1,
   },
 
   heroTitle: {
-    fontSize: 25,
+    color: "#FFFFFF",
+    fontSize: 29,
     fontWeight: "900",
-    color: COLORS.white,
-    marginBottom: 5,
+    marginTop: 23,
   },
 
-  heroDescription: {
+  heroText: {
+    color: "#C8D4EC",
+    fontSize: 14,
+    lineHeight: 22,
+    marginTop: 8,
+    maxWidth: 330,
+  },
+
+  heroBottom: {
+    marginTop: 22,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.12)",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  heroWelcome: {
+    color: "#A9B8D8",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  heroName: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+    marginTop: 2,
+  },
+
+  sectionTitle: {
+    color: DEEP_BLUE,
+    fontSize: 20,
+    fontWeight: "900",
+    marginBottom: 13,
+  },
+
+  sectionSubtitle: {
+    color: "#7A8498",
     fontSize: 12,
-    lineHeight: 18,
-    color: "#C8D5F0",
-    maxWidth: 230,
+    marginTop: -8,
+    marginBottom: 15,
+  },
+
+  contactRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 28,
+  },
+
+  contactCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 15,
+    minHeight: 158,
+    borderWidth: 1,
+    borderColor: "#E6EAF1",
+    shadowColor: "#071A3A",
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+
+  contactIcon: {
+    width: 45,
+    height: 45,
+    borderRadius: 14,
+    backgroundColor: "#EDF3FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 13,
+  },
+
+  contactTitle: {
+    color: DEEP_BLUE,
+    fontSize: 14,
+    fontWeight: "900",
+  },
+
+  contactValue: {
+    color: "#687386",
+    fontSize: 10,
+    lineHeight: 15,
+    marginTop: 5,
+  },
+
+  contactArrow: {
+    position: "absolute",
+    right: 13,
+    bottom: 13,
+    width: 27,
+    height: 27,
+    borderRadius: 9,
+    backgroundColor: "#EDF3FF",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   sectionHeader: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: COLORS.navy,
-  },
-
-  sectionSubtitle: {
-    fontSize: 11,
-    color: COLORS.muted,
-    marginTop: 3,
-  },
-
-  sectionIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 13,
-    backgroundColor: COLORS.blueLight,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  contactCard: {
-    minHeight: 88,
-    backgroundColor: COLORS.white,
-    borderRadius: 19,
-    padding: 14,
-    marginBottom: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-
-  contactIconBlue: {
-    width: 52,
-    height: 52,
-    borderRadius: 17,
-    backgroundColor: COLORS.blueLight,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 13,
-  },
-
-  contactIconGreen: {
-    width: 52,
-    height: 52,
-    borderRadius: 17,
-    backgroundColor: "#E7F7F0",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 13,
-  },
-
-  contactInfo: {
-    flex: 1,
-  },
-
-  contactLabel: {
-    fontSize: 8,
-    fontWeight: "900",
-    letterSpacing: 1,
-    color: COLORS.blue,
-    marginBottom: 3,
-  },
-
-  contactTitle: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: COLORS.text,
-  },
-
-  contactValue: {
-    fontSize: 11,
-    color: COLORS.muted,
-    marginTop: 2,
-  },
-
-  arrowCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: COLORS.background,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: "flex-start",
   },
 
   faqContainer: {
@@ -590,16 +964,15 @@ const styles = StyleSheet.create({
   },
 
   faqCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: "#FFFFFF",
     borderRadius: 18,
-    padding: 15,
     borderWidth: 1,
-    borderColor: COLORS.border,
+    borderColor: "#E6EAF1",
+    padding: 15,
   },
 
   faqCardOpen: {
-    borderColor: "#BFD0FF",
-    backgroundColor: "#FBFCFF",
+    borderColor: "#BFD1FA",
   },
 
   faqTop: {
@@ -608,130 +981,214 @@ const styles = StyleSheet.create({
   },
 
   faqNumber: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: COLORS.background,
+    width: 37,
+    height: 37,
+    borderRadius: 11,
+    backgroundColor: "#EDF3FF",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 11,
   },
 
-  faqNumberOpen: {
-    backgroundColor: COLORS.blue,
-  },
-
   faqNumberText: {
-    fontSize: 10,
+    color: ROYAL_BLUE,
+    fontSize: 11,
     fontWeight: "900",
-    color: COLORS.muted,
-  },
-
-  faqNumberTextOpen: {
-    color: COLORS.white,
   },
 
   faqQuestion: {
     flex: 1,
+    color: DEEP_BLUE,
     fontSize: 13,
     lineHeight: 19,
-
-    // FIXED: valid React Native fontWeight
-    fontWeight: "700",
-
-    color: COLORS.text,
-    paddingRight: 8,
-  },
-
-  faqArrow: {
-    width: 31,
-    height: 31,
-    borderRadius: 15.5,
-    backgroundColor: COLORS.background,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  faqArrowOpen: {
-    backgroundColor: COLORS.blue,
+    fontWeight: "800",
+    marginRight: 7,
   },
 
   answerContainer: {
     flexDirection: "row",
     marginTop: 13,
-    paddingTop: 12,
+    paddingTop: 13,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border,
+    borderTopColor: "#EEF1F5",
   },
 
   answerLine: {
     width: 3,
     borderRadius: 2,
-    backgroundColor: COLORS.blue,
-    marginRight: 11,
+    backgroundColor: GOLD,
+    marginRight: 12,
   },
 
   faqAnswer: {
     flex: 1,
+    color: "#687386",
     fontSize: 12,
     lineHeight: 19,
-    color: COLORS.muted,
   },
 
-  bottomCard: {
-    marginTop: 25,
-    padding: 15,
-    borderRadius: 20,
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  bottomSupport: {
+    backgroundColor: MID_BLUE,
+    borderRadius: 22,
+    padding: 16,
+    marginTop: 28,
     flexDirection: "row",
     alignItems: "center",
   },
 
   bottomIcon: {
-    width: 44,
-    height: 44,
+    width: 47,
+    height: 47,
     borderRadius: 15,
-    backgroundColor: COLORS.blueLight,
+    backgroundColor: "#163A78",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+
+  bottomTextWrap: {
+    flex: 1,
+  },
+
+  bottomTitle: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "900",
+  },
+
+  bottomText: {
+    color: "#B8C8E6",
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 3,
+  },
+
+  bottomButton: {
+    width: 43,
+    height: 43,
+    borderRadius: 14,
+    backgroundColor: ROYAL_BLUE,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
+  },
+
+  footer: {
+    textAlign: "center",
+    color: "#9AA4B5",
+    fontSize: 10,
+    marginTop: 22,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.38)",
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+    paddingTop: 82,
+    paddingRight: 14,
+    paddingLeft: 28,
+  },
+
+  menuCard: {
+    width: 330,
+    maxWidth: "100%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 22,
+    padding: 14,
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+
+  menuHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 6,
+  },
+
+  menuAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: ROYAL_BLUE,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  menuAvatarText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "900",
+  },
+
+  menuUserInfo: {
+    flex: 1,
+    marginLeft: 11,
+    marginRight: 8,
+  },
+
+  menuUserName: {
+    color: DEEP_BLUE,
+    fontSize: 15,
+    fontWeight: "900",
+  },
+
+  menuUserEmail: {
+    color: "#8992A3",
+    fontSize: 10,
+    marginTop: 3,
+  },
+
+  menuDivider: {
+    height: 1,
+    backgroundColor: "#EDF0F4",
+    marginVertical: 9,
+  },
+
+  menuItem: {
+    minHeight: 49,
+    borderRadius: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+
+  menuIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    backgroundColor: "#F0F4FF",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 11,
   },
 
-  bottomText: {
+  menuText: {
     flex: 1,
+    color: "#26334D",
+    fontSize: 13,
+    fontWeight: "700",
   },
 
-  bottomTitle: {
+  logoutButton: {
+    height: 48,
+    borderRadius: 13,
+    backgroundColor: "#FFF2F1",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 13,
+  },
+
+  logoutText: {
+    color: "#D92D20",
     fontSize: 13,
     fontWeight: "800",
-    color: COLORS.navy,
-  },
-
-  bottomDescription: {
-    fontSize: 10,
-    color: COLORS.muted,
-    marginTop: 3,
-  },
-
-  contactButton: {
-    backgroundColor: COLORS.blue,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-
-  contactButtonText: {
-    color: COLORS.white,
-    fontSize: 11,
-    fontWeight: "800",
-  },
-
-  footerText: {
-    textAlign: "center",
-    fontSize: 9,
-    color: "#A2AEC4",
-    marginTop: 22,
+    marginLeft: 11,
   },
 });

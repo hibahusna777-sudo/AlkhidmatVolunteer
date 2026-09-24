@@ -15,53 +15,24 @@ import {
   View,
 } from "react-native";
 
-const USER_NAME = "Husna";
-const USER_ROLE = "Volunteer";
-
 export default function HomeScreen() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // ================= NAVIGATION =================
 
-  const openScan = () => {
-    router.push("/scan");
-  };
-
-  const openMyEvents = () => {
-    router.push("/my-events");
-  };
-
-  const openAssistant = () => {
-    router.push("/assistant");
-  };
-
-  const openNearby = () => {
-    router.push("/nearby");
-  };
-
-  const openCertificates = () => {
-    router.push("/certificates");
-  };
-
-  const openBanoQabil = () => {
+  const openScan = () => router.push("/scan");
+  const openMyEvents = () => router.push("/my-events");
+  const openAssistant = () => router.push("/assistant");
+  const openNearby = () => router.push("/nearby");
+  const openCertificates = () => router.push("/certificates");
+  const openFlagshipProgram = () =>
     router.push("/flagship-program");
-  };
-
-  const openHackathon = () => {
+  const openHackathon = () =>
     router.push("/event-hackathon");
-  };
 
-  // Senior Volunteers
-  // File location:
-  // src/app/(tabs)/senior-volunteers.tsx
-  //
-  // "(tabs)" is a route group, so the actual route is:
-  // /senior-volunteers
-
-  const openSeniorVolunteers = () => {
+  const closeMenu = () => {
     setMenuOpen(false);
-    router.push("/senior-volunteers");
   };
 
   // ================= WEBSITE =================
@@ -77,18 +48,20 @@ export default function HomeScreen() {
     }
   };
 
-  // ================= MENU ACTIONS =================
+  // ================= COMING SOON =================
 
-  const handleMenuPress = (label: string) => {
+  const showComingSoon = (label: string) => {
     setMenuOpen(false);
 
     setTimeout(() => {
       Alert.alert(
         label,
-        `${label} screen will open here.`
+        `${label} is coming soon.`
       );
-    }, 250);
+    }, 150);
   };
+
+  // ================= LOGOUT =================
 
   const handleLogout = () => {
     setMenuOpen(false);
@@ -111,38 +84,8 @@ export default function HomeScreen() {
           },
         ]
       );
-    }, 250);
+    }, 150);
   };
-
-  // ================= PROFILE MENU =================
-
-  const menuItems = [
-    {
-      key: "profile",
-      icon: "person-outline" as const,
-      label: "My Profile",
-      onPress: () => handleMenuPress("My Profile"),
-    },
-    {
-      key: "settings",
-      icon: "settings-outline" as const,
-      label: "Settings",
-      onPress: () => handleMenuPress("Settings"),
-    },
-    {
-      key: "senior",
-      icon: "people-circle-outline" as const,
-      label: "Senior Volunteers",
-      highlighted: true,
-      onPress: openSeniorVolunteers,
-    },
-    {
-      key: "help",
-      icon: "help-circle-outline" as const,
-      label: "Help & Support",
-      onPress: () => handleMenuPress("Help & Support"),
-    },
-  ];
 
   // ================= FEATURES =================
 
@@ -193,7 +136,7 @@ export default function HomeScreen() {
       title: "Flagship Program",
       description:
         "Explore free IT training and skill development.",
-      onPress: openBanoQabil,
+      onPress: openFlagshipProgram,
     },
   ];
 
@@ -208,24 +151,18 @@ export default function HomeScreen() {
         {/* ================= HERO ================= */}
 
         <View style={styles.hero}>
-          <Image
-            source={require("../../assets/images/opportunities/50-years-banner.jpg")}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
-
-          <View style={styles.heroOverlay} />
-
           <View style={styles.heroContent}>
+
             {/* TOP ROW */}
 
             <View style={styles.topRow}>
-              {/* LOGO */}
+
+              {/* ALKHIDMAT LOGO */}
 
               <View style={styles.logoBadge}>
                 <Image
                   source={require("../../assets/images/alkhidmat-logo.png")}
-                  style={styles.logo}
+                  style={styles.alkhidmatLogo}
                   resizeMode="contain"
                 />
               </View>
@@ -233,11 +170,15 @@ export default function HomeScreen() {
               {/* RIGHT SIDE */}
 
               <View style={styles.topRightGroup}>
+
                 {/* NOTIFICATION */}
 
                 <TouchableOpacity
                   style={styles.bellButton}
                   activeOpacity={0.7}
+                  onPress={() =>
+                    showComingSoon("Notifications")
+                  }
                 >
                   <Ionicons
                     name="notifications-outline"
@@ -248,29 +189,42 @@ export default function HomeScreen() {
                   <View style={styles.bellDot} />
                 </TouchableOpacity>
 
-                {/* PROFILE */}
+                {/* ACCOUNT DROPDOWN */}
 
-                <TouchableOpacity
+                <Pressable
                   style={styles.profileChip}
                   onPress={() => setMenuOpen(true)}
-                  activeOpacity={0.8}
+                  hitSlop={10}
+                  android_ripple={{
+                    color: "rgba(255,255,255,0.18)",
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Open volunteer account menu"
                 >
                   <View style={styles.avatarCircle}>
-                    <Text style={styles.avatarLetter}>
-                      {USER_NAME.charAt(0)}
+                    <Ionicons
+                      name="person"
+                      size={16}
+                      color="#1857D8"
+                    />
+                  </View>
+
+                  <View style={styles.profileChipText}>
+                    <Text style={styles.profileChipName}>
+                      Volunteer
+                    </Text>
+
+                    <Text style={styles.profileChipRole}>
+                      Alkhidmat Volunteer
                     </Text>
                   </View>
 
-                  <Text style={styles.profileName}>
-                    {USER_NAME}
-                  </Text>
-
                   <Ionicons
                     name="chevron-down"
-                    size={14}
+                    size={18}
                     color="#FFFFFF"
                   />
-                </TouchableOpacity>
+                </Pressable>
               </View>
             </View>
 
@@ -289,11 +243,9 @@ export default function HomeScreen() {
               </Text>
 
               <Text style={styles.heroParagraph}>
-                Join meaningful opportunities and make a positive
-                difference in your community.
+                Join meaningful opportunities and make a
+                positive difference in your community.
               </Text>
-
-              {/* EXPLORE EVENTS */}
 
               <TouchableOpacity
                 style={styles.exploreButton}
@@ -307,7 +259,7 @@ export default function HomeScreen() {
                 <Ionicons
                   name="arrow-forward"
                   size={16}
-                  color="#0B2A5B"
+                  color="#10234B"
                 />
               </TouchableOpacity>
             </View>
@@ -320,7 +272,7 @@ export default function HomeScreen() {
           <Ionicons
             name="people"
             size={18}
-            color="#0B2A5B"
+            color="#1857D8"
           />
 
           <Text style={styles.introText}>
@@ -381,7 +333,7 @@ export default function HomeScreen() {
             <Ionicons
               name="globe-outline"
               size={16}
-              color="#0B2A5B"
+              color="#10234B"
             />
 
             <Text style={styles.ctaButtonTextBold}>
@@ -391,75 +343,205 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      {/* ================= PROFILE DROPDOWN ================= */}
+      {/* ================= ACCOUNT DROPDOWN ================= */}
 
       <Modal
         visible={menuOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setMenuOpen(false)}
+        onRequestClose={closeMenu}
       >
-        <Pressable
-          style={styles.modalBackdrop}
-          onPress={() => setMenuOpen(false)}
-        >
+        <View style={styles.modalRoot}>
+
+          {/* BACKDROP */}
+
+          <Pressable
+            style={styles.modalBackdrop}
+            onPress={closeMenu}
+          />
+
+          {/* DROPDOWN */}
+
           <View style={styles.dropdown}>
-            {/* USER HEADER */}
+
+            {/* HEADER */}
 
             <View style={styles.dropdownHeader}>
               <View style={styles.dropdownAvatar}>
-                <Text style={styles.dropdownAvatarLetter}>
-                  {USER_NAME.charAt(0)}
-                </Text>
+                <Ionicons
+                  name="person"
+                  size={20}
+                  color="#1857D8"
+                />
               </View>
 
-              <View>
+              <View style={styles.dropdownHeaderText}>
                 <Text style={styles.dropdownName}>
-                  {USER_NAME}
+                  Volunteer
                 </Text>
 
                 <Text style={styles.dropdownRole}>
-                  {USER_ROLE}
+                  Alkhidmat Volunteer
                 </Text>
               </View>
+
+              <Pressable
+                onPress={closeMenu}
+                hitSlop={10}
+                style={styles.closeButton}
+              >
+                <Ionicons
+                  name="close"
+                  size={18}
+                  color="#64748B"
+                />
+              </Pressable>
             </View>
 
             <View style={styles.dropdownDivider} />
 
-            {/* MENU ITEMS */}
+            {/* MY PROFILE */}
 
-            {menuItems.map((item) => (
-              <TouchableOpacity
-                key={item.key}
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              activeOpacity={0.7}
+              onPress={() => {
+                setMenuOpen(false);
+                router.push("/profile" as any);
+              }}
+            >
+              <Ionicons
+                name="person-outline"
+                size={19}
+                color="#1857D8"
+              />
+
+              <Text style={styles.dropdownItemText}>
+                My Profile
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#94A3B8"
+              />
+            </TouchableOpacity>
+
+            {/* MY EVENTS */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              activeOpacity={0.7}
+              onPress={() => {
+                setMenuOpen(false);
+                router.push("/my-events");
+              }}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={19}
+                color="#1857D8"
+              />
+
+              <Text style={styles.dropdownItemText}>
+                My Events
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#94A3B8"
+              />
+            </TouchableOpacity>
+
+            {/* SENIOR VOLUNTEERS */}
+
+            <TouchableOpacity
+              style={[
+                styles.dropdownItem,
+                styles.dropdownItemActive,
+              ]}
+              activeOpacity={0.7}
+              onPress={() => {
+                setMenuOpen(false);
+                router.push(
+                  "/senior-volunteers" as any
+                );
+              }}
+            >
+              <Ionicons
+                name="people-circle-outline"
+                size={19}
+                color="#1857D8"
+              />
+
+              <Text
                 style={[
-                  styles.dropdownItem,
-                  item.highlighted &&
-                    styles.dropdownItemActive,
+                  styles.dropdownItemText,
+                  styles.dropdownItemTextActive,
                 ]}
-                onPress={item.onPress}
-                activeOpacity={0.7}
               >
-                <Ionicons
-                  name={item.icon}
-                  size={18}
-                  color={
-                    item.highlighted
-                      ? "#2F6BFF"
-                      : "#475569"
-                  }
-                />
+                Senior Volunteers
+              </Text>
 
-                <Text
-                  style={[
-                    styles.dropdownItemText,
-                    item.highlighted &&
-                      styles.dropdownItemTextActive,
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#1857D8"
+              />
+            </TouchableOpacity>
+
+            {/* SETTINGS */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              activeOpacity={0.7}
+              onPress={() =>
+                showComingSoon("Settings")
+              }
+            >
+              <Ionicons
+                name="settings-outline"
+                size={19}
+                color="#475569"
+              />
+
+              <Text style={styles.dropdownItemText}>
+                Settings
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#94A3B8"
+              />
+            </TouchableOpacity>
+
+            {/* HELP */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              activeOpacity={0.7}
+              onPress={() =>
+                showComingSoon("Help & Support")
+              }
+            >
+              <Ionicons
+                name="help-circle-outline"
+                size={19}
+                color="#475569"
+              />
+
+              <Text style={styles.dropdownItemText}>
+                Help & Support
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#94A3B8"
+              />
+            </TouchableOpacity>
 
             <View style={styles.dropdownDivider} />
 
@@ -472,16 +554,22 @@ export default function HomeScreen() {
             >
               <Ionicons
                 name="log-out-outline"
-                size={18}
+                size={19}
                 color="#EF4444"
               />
 
               <Text style={styles.logoutText}>
                 Logout
               </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#EF4444"
+              />
             </TouchableOpacity>
           </View>
-        </Pressable>
+        </View>
       </Modal>
     </SafeAreaView>
   );
@@ -507,26 +595,12 @@ const styles = StyleSheet.create({
     height: 280,
     borderRadius: 24,
     overflow: "hidden",
-    position: "relative",
-    backgroundColor: "#0B2A5B",
-  },
-
-  heroImage: {
-    ...StyleSheet.absoluteFill,
-    width: "100%",
-    height: "100%",
-  },
-
-  heroOverlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: "rgba(6, 20, 46, 0.30)",
+    backgroundColor: "#10234B",
   },
 
   heroContent: {
     flex: 1,
     padding: 20,
-    position: "relative",
-    zIndex: 2,
   },
 
   topRow: {
@@ -534,6 +608,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+
+  // ================= LOGO =================
 
   logoBadge: {
     width: 52,
@@ -544,10 +620,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  logo: {
+  alkhidmatLogo: {
     width: 42,
     height: 42,
   },
+
+  // ================= TOP RIGHT =================
 
   topRightGroup: {
     flexDirection: "row",
@@ -559,7 +637,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.18)",
+    backgroundColor: "rgba(255,255,255,0.16)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -571,22 +649,23 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: "#F97316",
+    backgroundColor: "#FBBF24",
     borderWidth: 1.5,
     borderColor: "#FFFFFF",
   },
 
-  // ================= PROFILE =================
+  // ================= PROFILE CHIP =================
 
   profileChip: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.18)",
+    backgroundColor: "rgba(255,255,255,0.16)",
     paddingLeft: 4,
     paddingRight: 10,
     paddingVertical: 4,
     borderRadius: 22,
     gap: 7,
+    overflow: "hidden",
   },
 
   avatarCircle: {
@@ -598,17 +677,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  avatarLetter: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#2F6BFF",
+  profileChipText: {
+    justifyContent: "center",
+    maxWidth: 112,
   },
 
-  profileName: {
-    fontSize: 13,
-    fontWeight: "700",
+  profileChipName: {
+    fontSize: 10,
+    fontWeight: "800",
     color: "#FFFFFF",
   },
+
+  profileChipRole: {
+    fontSize: 7,
+    color: "#DCE6F7",
+    marginTop: 1,
+  },
+
+  // ================= HERO TEXT =================
 
   heroTextArea: {
     marginTop: "auto",
@@ -616,7 +702,7 @@ const styles = StyleSheet.create({
 
   greeting: {
     fontSize: 13,
-    color: "#F1F5F9",
+    color: "#E8EEF9",
     marginBottom: 6,
   },
 
@@ -634,7 +720,7 @@ const styles = StyleSheet.create({
 
   heroParagraph: {
     fontSize: 12,
-    color: "#E2E8F0",
+    color: "#DCE6F7",
     lineHeight: 18,
     marginBottom: 14,
     maxWidth: 300,
@@ -652,71 +738,85 @@ const styles = StyleSheet.create({
   },
 
   exploreText: {
-    color: "#0B2A5B",
+    color: "#10234B",
     fontSize: 13,
     fontWeight: "800",
   },
 
-  // ================= DROPDOWN =================
+  // ================= MODAL =================
 
-  modalBackdrop: {
+  modalRoot: {
     flex: 1,
-    backgroundColor: "rgba(6, 20, 46, 0.25)",
-    alignItems: "flex-end",
-    paddingTop: 95,
-    paddingRight: 22,
   },
 
+  modalBackdrop: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: "rgba(6,20,46,0.30)",
+  },
+
+  // ================= DROPDOWN =================
+
   dropdown: {
-    width: 225,
+    position: "absolute",
+    top: 82,
+    right: 18,
+    width: 265,
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: 18,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: "#EEF2F7",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.15,
-    shadowRadius: 14,
+    borderColor: "#E8EDF5",
+    shadowColor: "#10234B",
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
     shadowOffset: {
       width: 0,
       height: 8,
     },
-    elevation: 8,
+    elevation: 10,
   },
 
   dropdownHeader: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
-    paddingVertical: 10,
+    paddingVertical: 12,
     gap: 11,
   },
 
   dropdownAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: "#EAF0FF",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  dropdownAvatarLetter: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#2F6BFF",
+  dropdownHeaderText: {
+    flex: 1,
   },
 
   dropdownName: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "800",
-    color: "#0B2A5B",
+    color: "#10234B",
   },
 
   dropdownRole: {
     fontSize: 11,
-    color: "#64748B",
-    marginTop: 2,
+    color: "#1857D8",
+    fontWeight: "600",
+    marginTop: 3,
+  },
+
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   dropdownDivider: {
@@ -729,7 +829,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 12,
     gap: 11,
   },
 
@@ -738,17 +838,19 @@ const styles = StyleSheet.create({
   },
 
   dropdownItemText: {
+    flex: 1,
     fontSize: 13,
     fontWeight: "600",
     color: "#334155",
   },
 
   dropdownItemTextActive: {
-    color: "#2F6BFF",
+    color: "#1857D8",
     fontWeight: "800",
   },
 
   logoutText: {
+    flex: 1,
     fontSize: 13,
     fontWeight: "700",
     color: "#EF4444",
@@ -774,7 +876,7 @@ const styles = StyleSheet.create({
   },
 
   introAccent: {
-    color: "#2F6BFF",
+    color: "#1857D8",
     fontWeight: "800",
   },
 
@@ -795,8 +897,8 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 4,
     borderWidth: 1,
-    borderColor: "#EEF2F7",
-    shadowColor: "#0F172A",
+    borderColor: "#E8EDF5",
+    shadowColor: "#10234B",
     shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: {
@@ -810,7 +912,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#2F6BFF",
+    backgroundColor: "#1857D8",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
@@ -819,7 +921,7 @@ const styles = StyleSheet.create({
   featureTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#0B2A5B",
+    color: "#10234B",
     marginBottom: 5,
     lineHeight: 17,
   },
@@ -833,7 +935,7 @@ const styles = StyleSheet.create({
   // ================= CTA =================
 
   ctaBand: {
-    backgroundColor: "#0B2A5B",
+    backgroundColor: "#10234B",
     marginTop: 24,
     paddingHorizontal: 20,
     paddingVertical: 24,
@@ -864,7 +966,7 @@ const styles = StyleSheet.create({
 
   ctaButtonTextBold: {
     fontSize: 12,
-    color: "#0B2A5B",
+    color: "#10234B",
     fontWeight: "800",
   },
 });

@@ -1,24 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-const USER_NAME = "Sadaf";
+const CURRENT_USER_KEY = "@alkhidmat_current_user";
 
 const COLORS = {
   navy: "#0B2A5B",
   navyDark: "#071A3A",
   blue: "#2F6BFF",
   blueLight: "#EAF0FF",
+  gold: "#E8C56A",
   white: "#FFFFFF",
   background: "#F5F7FB",
   text: "#0B2A5B",
@@ -27,9 +32,20 @@ const COLORS = {
   border: "#EEF2F7",
 };
 
+type CurrentUser = {
+  id?: string;
+  fullName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  city?: string;
+  role?: string;
+};
+
 type Volunteer = {
   id: string;
   name: string;
+  phone: string;
   field: string;
   city: string;
   avatarColor: string;
@@ -38,48 +54,102 @@ type Volunteer = {
 const VOLUNTEERS: Volunteer[] = [
   {
     id: "1",
-    name: "Ahmad Hussain",
+    name: "Haroon Rajput",
+    phone: "+92 332 3635376",
     field: "Community Services",
     city: "Karachi",
     avatarColor: "#2F6BFF",
   },
   {
     id: "2",
-    name: "Sania Zahra",
+    name: "Asad Aaley",
+    phone: "+92 333 2668263",
     field: "Education Support",
     city: "Lahore",
     avatarColor: "#8B5CF6",
   },
   {
     id: "3",
-    name: "Muhammad Asif",
-    field: "Health & Wellness",
-    city: "Islamabad",
+    name: "Tabinda Tariq",
+    phone: "+92 335 0133950",
+    field: "Community Services",
+    city: "Karachi",
     avatarColor: "#2F6BFF",
   },
   {
     id: "4",
-    name: "Rukhsana Khan",
+    name: "Hamas Malik",
+    phone: "+92 331 2469322",
     field: "Event Management",
-    city: "Peshawar",
+    city: "Islamabad",
     avatarColor: "#2F6BFF",
+  },
+  {
+    id: "5",
+    name: "Talha Shahid",
+    phone: "+92 344 4482399",
+    field: "Volunteer Management",
+    city: "Peshawar",
+    avatarColor: "#8B5CF6",
   },
 ];
 
 const getInitials = (fullName: string) => {
-  const parts = fullName.trim().split(" ");
+  const cleanName = fullName.trim();
+
+  if (!cleanName) {
+    return "AK";
+  }
+
+  const parts = cleanName.split(/\s+/);
 
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }
 
-  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  return (
+    parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
 };
 
 export default function SeniorVolunteersScreen() {
   const router = useRouter();
 
   const [search, setSearch] = useState("");
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    loadCurrentUser();
+  }, []);
+
+  const loadCurrentUser = async () => {
+    try {
+      const storedUser = await AsyncStorage.getItem(CURRENT_USER_KEY);
+
+      if (storedUser) {
+        const parsedUser: CurrentUser = JSON.parse(storedUser);
+        setCurrentUser(parsedUser);
+      }
+    } catch (error) {
+      console.log("Could not load current user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const displayName = useMemo(() => {
+    return (
+      currentUser?.fullName?.trim() ||
+      currentUser?.name?.trim() ||
+      "Volunteer"
+    );
+  }, [currentUser]);
+
+  const initials = useMemo(() => {
+    return getInitials(displayName);
+  }, [displayName]);
 
   const filteredVolunteers = VOLUNTEERS.filter((person) => {
     const query = search.trim().toLowerCase();
@@ -91,31 +161,118 @@ export default function SeniorVolunteersScreen() {
     return (
       person.name.toLowerCase().includes(query) ||
       person.field.toLowerCase().includes(query) ||
-      person.city.toLowerCase().includes(query)
+      person.city.toLowerCase().includes(query) ||
+      person.phone.toLowerCase().includes(query)
     );
   });
 
   const viewProfile = (person: Volunteer) => {
     Alert.alert(
       person.name,
-      `${person.field}\nSenior Volunteer • ${person.city}`,
+      `${person.field}\nSenior Volunteer • ${person.city}\n\nPhone: ${person.phone}`,
+      [
+        {
+          text: "Close",
+          style: "cancel",
+        },
+      ],
     );
   };
 
   const openFilter = () => {
-    Alert.alert("Filter", "Filter options will be available here.");
+    Alert.alert(
+      "Filter Volunteers",
+      "Volunteer filtering options will be available here.",
+    );
   };
+
+  const openMyProfile = () => {
+    setMenuOpen(false);
+    router.replace("/profile");
+  };
+
+  const openSeniorVolunteers = () => {
+    setMenuOpen(false);
+  };
+
+  const openSettings = () => {
+    setMenuOpen(false);
+
+    setTimeout(() => {
+      Alert.alert(
+        "Settings",
+        "Account and app settings will be available here.",
+      );
+    }, 200);
+  };
+
+  const openHelp = () => {
+    setMenuOpen(false);
+
+    setTimeout(() => {
+      Alert.alert(
+        "Help & Support",
+        "Help and support options will be available here.",
+      );
+    }, 200);
+  };
+
+  const handleLogout = () => {
+    setMenuOpen(false);
+
+    setTimeout(() => {
+      Alert.alert(
+        "Logout",
+        "Are you sure you want to logout?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Logout",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await AsyncStorage.removeItem(CURRENT_USER_KEY);
+                await AsyncStorage.removeItem("@alkhidmat_profile");
+
+                router.replace("/login");
+              } catch (error) {
+                Alert.alert(
+                  "Logout Error",
+                  "Unable to logout. Please try again.",
+                );
+              }
+            },
+          },
+        ],
+      );
+    }, 200);
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.blue} />
+
+        <Text style={styles.loadingText}>
+          Loading volunteers...
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-
       {/* ================= HEADER ================= */}
-      <View style={styles.header}>
 
+      <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity
             onPress={() => router.back()}
             activeOpacity={0.7}
+            style={styles.backButton}
           >
             <Ionicons
               name="arrow-back"
@@ -139,30 +296,45 @@ export default function SeniorVolunteersScreen() {
               size={18}
               color={COLORS.white}
             />
+
             <View style={styles.bellDot} />
           </TouchableOpacity>
 
-          <View style={styles.profileChip}>
+          {/* ================= ACCOUNT DROPDOWN BUTTON ================= */}
+
+          <TouchableOpacity
+            style={styles.profileChip}
+            activeOpacity={0.8}
+            onPress={() => setMenuOpen(true)}
+          >
             <View style={styles.avatarSmall}>
               <Text style={styles.avatarSmallLetter}>
-                {USER_NAME.charAt(0)}
+                {initials}
               </Text>
             </View>
 
-            <Text style={styles.profileName}>
-              {USER_NAME}
+            <Text
+              style={styles.profileName}
+              numberOfLines={1}
+            >
+              {displayName}
             </Text>
-          </View>
-        </View>
 
+            <Ionicons
+              name="chevron-down"
+              size={13}
+              color={COLORS.white}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-
         {/* ================= HERO ================= */}
+
         <View style={styles.hero}>
           <View style={styles.heroCircle} />
 
@@ -194,8 +366,8 @@ export default function SeniorVolunteersScreen() {
         </View>
 
         {/* ================= SEARCH ================= */}
-        <View style={styles.searchRow}>
 
+        <View style={styles.searchRow}>
           <View style={styles.searchBox}>
             <Ionicons
               name="search"
@@ -209,6 +381,8 @@ export default function SeniorVolunteersScreen() {
               placeholderTextColor={COLORS.lightMuted}
               value={search}
               onChangeText={setSearch}
+              autoCapitalize="none"
+              returnKeyType="search"
             />
           </View>
 
@@ -223,10 +397,24 @@ export default function SeniorVolunteersScreen() {
               color={COLORS.muted}
             />
           </TouchableOpacity>
+        </View>
 
+        {/* ================= RESULT COUNT ================= */}
+
+        <View style={styles.resultHeader}>
+          <Text style={styles.resultTitle}>
+            Volunteer Directory
+          </Text>
+
+          <View style={styles.countBadge}>
+            <Text style={styles.countBadgeText}>
+              {filteredVolunteers.length}
+            </Text>
+          </View>
         </View>
 
         {/* ================= VOLUNTEER LIST ================= */}
+
         {filteredVolunteers.length === 0 ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIcon}>
@@ -242,18 +430,24 @@ export default function SeniorVolunteersScreen() {
             </Text>
 
             <Text style={styles.emptyText}>
-              Try searching with a different name or role.
+              Try searching with a different name, phone number
+              or role.
             </Text>
           </View>
         ) : (
           filteredVolunteers.map((person) => (
-            <View key={person.id} style={styles.card}>
-
+            <View
+              key={person.id}
+              style={styles.card}
+            >
               {/* Avatar */}
+
               <View
                 style={[
                   styles.avatarLarge,
-                  { backgroundColor: person.avatarColor },
+                  {
+                    backgroundColor: person.avatarColor,
+                  },
                 ]}
               >
                 <Text style={styles.avatarLargeText}>
@@ -262,6 +456,7 @@ export default function SeniorVolunteersScreen() {
               </View>
 
               {/* Info */}
+
               <View style={styles.cardInfo}>
                 <Text style={styles.cardName}>
                   {person.name}
@@ -288,16 +483,29 @@ export default function SeniorVolunteersScreen() {
                     {person.city}
                   </Text>
                 </View>
+
+                <View style={styles.phoneRow}>
+                  <Ionicons
+                    name="call-outline"
+                    size={12}
+                    color={COLORS.blue}
+                  />
+
+                  <Text style={styles.phoneText}>
+                    {person.phone}
+                  </Text>
+                </View>
               </View>
 
               {/* View profile */}
+
               <TouchableOpacity
                 style={styles.profileButton}
                 onPress={() => viewProfile(person)}
                 activeOpacity={0.8}
               >
                 <Text style={styles.profileButtonText}>
-                  View Profile
+                  View
                 </Text>
 
                 <Ionicons
@@ -306,12 +514,12 @@ export default function SeniorVolunteersScreen() {
                   color={COLORS.blue}
                 />
               </TouchableOpacity>
-
             </View>
           ))
         )}
 
         {/* ================= IMPACT BANNER ================= */}
+
         <View style={styles.impactCard}>
           <View style={styles.impactIcon}>
             <Ionicons
@@ -331,8 +539,217 @@ export default function SeniorVolunteersScreen() {
             </Text>
           </View>
         </View>
-
       </ScrollView>
+
+      {/* ================= ACCOUNT DROPDOWN MODAL ================= */}
+
+      <Modal
+        visible={menuOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuOpen(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setMenuOpen(false)}
+        >
+          <Pressable
+            style={styles.dropdown}
+            onPress={(event) => event.stopPropagation()}
+          >
+            {/* Dropdown Header */}
+
+            <View style={styles.dropdownHeader}>
+              <View style={styles.dropdownAvatar}>
+                <Text style={styles.dropdownAvatarText}>
+                  {initials}
+                </Text>
+              </View>
+
+              <View style={styles.dropdownUserInfo}>
+                <Text
+                  style={styles.dropdownName}
+                  numberOfLines={1}
+                >
+                  {displayName}
+                </Text>
+
+                <Text style={styles.dropdownRole}>
+                  Volunteer Account
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setMenuOpen(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons
+                  name="close"
+                  size={20}
+                  color={COLORS.muted}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.dropdownDivider} />
+
+            {/* My Profile */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={openMyProfile}
+              activeOpacity={0.7}
+            >
+              <View style={styles.dropdownIcon}>
+                <Ionicons
+                  name="person-outline"
+                  size={19}
+                  color={COLORS.blue}
+                />
+              </View>
+
+              <Text style={styles.dropdownItemText}>
+                My Profile
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={COLORS.lightMuted}
+              />
+            </TouchableOpacity>
+
+            {/* Senior Volunteers */}
+
+            <TouchableOpacity
+              style={[
+                styles.dropdownItem,
+                styles.dropdownItemActive,
+              ]}
+              onPress={openSeniorVolunteers}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.dropdownIcon,
+                  styles.dropdownIconActive,
+                ]}
+              >
+                <Ionicons
+                  name="people-outline"
+                  size={19}
+                  color={COLORS.white}
+                />
+              </View>
+
+              <Text
+                style={[
+                  styles.dropdownItemText,
+                  styles.dropdownItemTextActive,
+                ]}
+              >
+                Senior Volunteers
+              </Text>
+
+              <Ionicons
+                name="checkmark"
+                size={17}
+                color={COLORS.blue}
+              />
+            </TouchableOpacity>
+
+            {/* Settings */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={openSettings}
+              activeOpacity={0.7}
+            >
+              <View style={styles.dropdownIcon}>
+                <Ionicons
+                  name="settings-outline"
+                  size={19}
+                  color={COLORS.blue}
+                />
+              </View>
+
+              <Text style={styles.dropdownItemText}>
+                Settings
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={COLORS.lightMuted}
+              />
+            </TouchableOpacity>
+
+            {/* Help */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={openHelp}
+              activeOpacity={0.7}
+            >
+              <View style={styles.dropdownIcon}>
+                <Ionicons
+                  name="help-circle-outline"
+                  size={19}
+                  color={COLORS.blue}
+                />
+              </View>
+
+              <Text style={styles.dropdownItemText}>
+                Help & Support
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={COLORS.lightMuted}
+              />
+            </TouchableOpacity>
+
+            <View style={styles.dropdownDivider} />
+
+            {/* Logout */}
+
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={handleLogout}
+              activeOpacity={0.7}
+            >
+              <View
+                style={[
+                  styles.dropdownIcon,
+                  styles.logoutIcon,
+                ]}
+              >
+                <Ionicons
+                  name="log-out-outline"
+                  size={19}
+                  color="#DC2626"
+                />
+              </View>
+
+              <Text
+                style={[
+                  styles.dropdownItemText,
+                  styles.logoutText,
+                ]}
+              >
+                Logout
+              </Text>
+
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color="#FCA5A5"
+              />
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -341,6 +758,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  loadingText: {
+    marginTop: 12,
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.muted,
   },
 
   /* ================= HEADER ================= */
@@ -357,8 +788,16 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
     flex: 1,
+  },
+
+  backButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   headerTitle: {
@@ -370,7 +809,7 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 9,
+    gap: 8,
   },
 
   bellButton: {
@@ -399,31 +838,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.18)",
     paddingLeft: 3,
-    paddingRight: 9,
+    paddingRight: 8,
     paddingVertical: 3,
     borderRadius: 20,
-    gap: 6,
+    gap: 5,
+    maxWidth: 135,
   },
 
   avatarSmall: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 27,
+    height: 27,
+    borderRadius: 14,
     backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
   },
 
   avatarSmallLetter: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "800",
     color: COLORS.blue,
   },
 
   profileName: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: "700",
     color: COLORS.white,
+    maxWidth: 75,
   },
 
   scrollContent: {
@@ -500,7 +941,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 18,
     marginTop: 20,
-    marginBottom: 16,
+    marginBottom: 12,
   },
 
   searchBox: {
@@ -532,6 +973,38 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  /* ================= RESULT HEADER ================= */
+
+  resultHeader: {
+    paddingHorizontal: 18,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+
+  resultTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: COLORS.text,
+  },
+
+  countBadge: {
+    minWidth: 24,
+    height: 24,
+    paddingHorizontal: 7,
+    borderRadius: 12,
+    backgroundColor: COLORS.blueLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  countBadgeText: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: COLORS.blue,
   },
 
   /* ================= CARDS ================= */
@@ -616,16 +1089,29 @@ const styles = StyleSheet.create({
     color: COLORS.lightMuted,
   },
 
+  phoneRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 5,
+  },
+
+  phoneText: {
+    fontSize: 10.5,
+    color: COLORS.blue,
+    fontWeight: "600",
+  },
+
   profileButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    gap: 4,
     borderWidth: 1,
     borderColor: COLORS.blue,
     borderRadius: 9,
-    paddingHorizontal: 11,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    marginLeft: 8,
+    marginLeft: 7,
   },
 
   profileButtonText: {
@@ -706,5 +1192,132 @@ const styles = StyleSheet.create({
     color: "#C8D4ED",
     marginTop: 3,
     lineHeight: 16,
+  },
+
+  /* ================= DROPDOWN ================= */
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(7,26,58,0.38)",
+    alignItems: "flex-end",
+    paddingTop: 58,
+    paddingRight: 14,
+  },
+
+  dropdown: {
+    width: 285,
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    paddingVertical: 8,
+
+    shadowColor: "#071A3A",
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+
+    elevation: 10,
+  },
+
+  dropdownHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+
+  dropdownAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.blue,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dropdownAvatarText: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: COLORS.white,
+  },
+
+  dropdownUserInfo: {
+    flex: 1,
+    marginLeft: 10,
+  },
+
+  dropdownName: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: COLORS.text,
+  },
+
+  dropdownRole: {
+    fontSize: 11,
+    color: COLORS.muted,
+    marginTop: 3,
+  },
+
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: COLORS.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dropdownDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+    marginVertical: 5,
+  },
+
+  dropdownItem: {
+    minHeight: 50,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    marginHorizontal: 7,
+    borderRadius: 12,
+  },
+
+  dropdownItemActive: {
+    backgroundColor: COLORS.blueLight,
+  },
+
+  dropdownIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: COLORS.blueLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  dropdownIconActive: {
+    backgroundColor: COLORS.blue,
+  },
+
+  logoutIcon: {
+    backgroundColor: "#FEF2F2",
+  },
+
+  dropdownItemText: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 13,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+
+  dropdownItemTextActive: {
+    color: COLORS.blue,
+  },
+
+  logoutText: {
+    color: "#DC2626",
   },
 });

@@ -22,12 +22,12 @@ const COLORS = {
   blueLight: "#EAF1FF",
   background: "#F5F8FF",
   white: "#FFFFFF",
-  text: "#071A3A",
   body: "#1E293B",
   muted: "#687795",
   border: "#E2E8F5",
   divider: "#EEF2F8",
   green: "#65D89B",
+  gold: "#E8C56A",
 };
 
 type MessageSender = "bot" | "suggestion" | "user";
@@ -41,19 +41,23 @@ interface Message {
 const INITIAL_MESSAGES: Message[] = [
   {
     id: "greeting",
-    text: "Assalam o Alaikum! 👋 How can I help you with your volunteer journey today?",
+    text:
+      "Assalam o Alaikum! 👋 How can I help you with your volunteer journey today?",
     sender: "bot",
   },
+
   {
     id: "s1",
     text: "How can I join an event?",
     sender: "suggestion",
   },
+
   {
     id: "s2",
     text: "Where can I volunteer?",
     sender: "suggestion",
   },
+
   {
     id: "s3",
     text: "How to get certificate?",
@@ -61,142 +65,146 @@ const INITIAL_MESSAGES: Message[] = [
   },
 ];
 
-const SYSTEM_PROMPT =
-  "You are a friendly AI assistant inside the Alkhidmat Foundation " +
-  "volunteer app. Answer questions about joining volunteer events, " +
-  "finding volunteering opportunities, registration, and getting " +
-  "volunteer certificates. Keep every answer short, clear, and " +
-  "encouraging. If you genuinely don't know something specific to " +
-  "Alkhidmat, say so honestly and suggest contacting Alkhidmat support.";
+const getAIResponse = async (
+  userMessage: string
+): Promise<string> => {
+  const lowerMessage = userMessage.toLowerCase();
 
-/*
- * IMPORTANT SECURITY:
- *
- * Do NOT put your Anthropic API key inside this React Native app.
- * A client-side key can be extracted from the published application.
- *
- * For now this screen works safely without exposing a secret.
- * When you connect your backend, replace getAIResponse() with a
- * request to your own backend endpoint.
- */
+  await new Promise((resolve) =>
+    setTimeout(resolve, 500)
+  );
 
-const getAIResponse = async (userMessage: string): Promise<string> => {
-  try {
-    /*
-     * BACKEND CONNECTION GOES HERE.
-     *
-     * Example:
-     *
-     * const response = await fetch("YOUR_BACKEND_URL/assistant", {
-     *   method: "POST",
-     *   headers: {
-     *     "Content-Type": "application/json",
-     *   },
-     *   body: JSON.stringify({
-     *     message: userMessage,
-     *   }),
-     * });
-     *
-     * const data = await response.json();
-     * return data.reply;
-     */
-
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (
-      lowerMessage.includes("join") ||
-      lowerMessage.includes("event") ||
-      lowerMessage.includes("register")
-    ) {
-      return (
-        "You can join a volunteer event by opening My Events, " +
-        "selecting an available event, and tapping Register Now. " +
-        "After registration, you'll receive the event details."
-      );
-    }
-
-    if (
-      lowerMessage.includes("certificate") ||
-      lowerMessage.includes("certificates")
-    ) {
-      return (
-        "After completing an eligible volunteer activity, your " +
-        "certificate can appear in the Certificates section. " +
-        "Open Certificates from the app menu to check your available certificates."
-      );
-    }
-
-    if (
-      lowerMessage.includes("where") ||
-      lowerMessage.includes("volunteer") ||
-      lowerMessage.includes("opportunity")
-    ) {
-      return (
-        "You can explore available volunteer opportunities through " +
-        "My Events and the programs section. Look for programs that " +
-        "match your interests and register for an available opportunity."
-      );
-    }
-
-    if (
-      lowerMessage.includes("hello") ||
-      lowerMessage.includes("hi") ||
-      lowerMessage.includes("salam") ||
-      lowerMessage.includes("assalam")
-    ) {
-      return (
-        "Wa Alaikum Assalam! 👋 I'm here to help you with events, " +
-        "volunteer opportunities, registrations, and certificates."
-      );
-    }
-
+  // EVENTS / REGISTRATION
+  if (
+    lowerMessage.includes("join") ||
+    lowerMessage.includes("event") ||
+    lowerMessage.includes("register") ||
+    lowerMessage.includes("registration")
+  ) {
     return (
-      "I'd be happy to help with volunteer events, registrations, " +
-      "opportunities, or certificates. Please tell me what you'd like to know."
-    );
-  } catch (error) {
-    console.log("Assistant error:", error);
-
-    return (
-      "I'm having trouble responding right now. Please try again " +
-      "in a moment."
+      "You can join a volunteer event by opening My Events, " +
+      "selecting an available event, and tapping Register Now. " +
+      "After registration, you'll receive the event details."
     );
   }
+
+  // CERTIFICATES
+  if (
+    lowerMessage.includes("certificate") ||
+    lowerMessage.includes("certificates") ||
+    lowerMessage.includes("certification")
+  ) {
+    return (
+      "After completing an eligible volunteer activity, your " +
+      "certificate can appear in the Certificates section. " +
+      "Open Certificates from the app menu to check your available certificates."
+    );
+  }
+
+  // OPPORTUNITIES
+  if (
+    lowerMessage.includes("where") ||
+    lowerMessage.includes("volunteer") ||
+    lowerMessage.includes("opportunity") ||
+    lowerMessage.includes("opportunities") ||
+    lowerMessage.includes("program")
+  ) {
+    return (
+      "You can explore available volunteer opportunities through " +
+      "My Events and the programs section. Look for programs that " +
+      "match your interests and register for an available opportunity."
+    );
+  }
+
+  // GREETING
+  if (
+    lowerMessage.includes("hello") ||
+    lowerMessage.includes("hi") ||
+    lowerMessage.includes("salam") ||
+    lowerMessage.includes("assalam") ||
+    lowerMessage.includes("aoa")
+  ) {
+    return (
+      "Wa Alaikum Assalam! 👋 I'm here to help you with events, " +
+      "volunteer opportunities, registrations, and certificates."
+    );
+  }
+
+  // HELP
+  if (
+    lowerMessage.includes("help") ||
+    lowerMessage.includes("what can you do")
+  ) {
+    return (
+      "I can help you with volunteer events, registrations, " +
+      "opportunities, certificates, and general questions " +
+      "about your volunteer journey."
+    );
+  }
+
+  // THANK YOU
+  if (
+    lowerMessage.includes("thank") ||
+    lowerMessage.includes("thanks")
+  ) {
+    return (
+      "You're very welcome! 😊 I'm always here to help with your volunteer journey."
+    );
+  }
+
+  // GENERAL ANSWER
+  return (
+    "I'd be happy to help with your volunteer journey. " +
+    "You can ask me about events, registrations, volunteer " +
+    "opportunities, certificates, or how to use the app."
+  );
 };
 
 export default function AssistantScreen() {
   const router = useRouter();
-  const flatListRef = useRef<FlatList<Message>>(null);
+
+  const flatListRef =
+    useRef<FlatList<Message>>(null);
 
   const [messages, setMessages] =
     useState<Message[]>(INITIAL_MESSAGES);
 
-  const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [inputText, setInputText] =
+    useState("");
+
+  const [isLoading, setIsLoading] =
+    useState(false);
 
   const scrollToEnd = () => {
     setTimeout(() => {
       flatListRef.current?.scrollToEnd({
         animated: true,
       });
-    }, 100);
+    }, 150);
   };
 
-  const sendMessage = async (text?: string) => {
-    const messageText = (text ?? inputText).trim();
+  const sendMessage = async (
+    text?: string
+  ) => {
+    const messageText =
+      (text ?? inputText).trim();
 
     if (!messageText || isLoading) {
       return;
     }
 
+    // USER MESSAGE
     const userMessage: Message = {
       id: `${Date.now()}-user`,
       text: messageText,
       sender: "user",
     };
 
+    // Remove old suggestion cards while processing
     setMessages((current) => [
-      ...current.filter((item) => item.sender !== "suggestion"),
+      ...current.filter(
+        (item) => item.sender !== "suggestion"
+      ),
       userMessage,
     ]);
 
@@ -205,7 +213,9 @@ export default function AssistantScreen() {
 
     scrollToEnd();
 
-    const reply = await getAIResponse(messageText);
+    // GET ANSWER
+    const reply =
+      await getAIResponse(messageText);
 
     const botMessage: Message = {
       id: `${Date.now()}-bot`,
@@ -213,9 +223,28 @@ export default function AssistantScreen() {
       sender: "bot",
     };
 
+    // ADD ANSWER + NEW QUESTIONS
     setMessages((current) => [
       ...current,
       botMessage,
+
+      {
+        id: `${Date.now()}-next1`,
+        text: "How can I register for an event?",
+        sender: "suggestion",
+      },
+
+      {
+        id: `${Date.now()}-next2`,
+        text: "Where can I find volunteer opportunities?",
+        sender: "suggestion",
+      },
+
+      {
+        id: `${Date.now()}-next3`,
+        text: "How do I get my certificate?",
+        sender: "suggestion",
+      },
     ]);
 
     setIsLoading(false);
@@ -228,7 +257,9 @@ export default function AssistantScreen() {
   }: {
     item: Message;
   }) => {
-    /* User message */
+    // =========================
+    // USER MESSAGE
+    // =========================
 
     if (item.sender === "user") {
       return (
@@ -242,13 +273,17 @@ export default function AssistantScreen() {
       );
     }
 
-    /* Suggestion */
+    // =========================
+    // SUGGESTION
+    // =========================
 
     if (item.sender === "suggestion") {
       return (
         <TouchableOpacity
           style={styles.suggestionCard}
-          onPress={() => sendMessage(item.text)}
+          onPress={() =>
+            sendMessage(item.text)
+          }
           activeOpacity={0.8}
           disabled={isLoading}
         >
@@ -260,7 +295,10 @@ export default function AssistantScreen() {
             />
           </View>
 
-          <Text style={styles.suggestionText}>
+          <Text
+            style={styles.suggestionText}
+            numberOfLines={2}
+          >
             {item.text}
           </Text>
 
@@ -273,7 +311,9 @@ export default function AssistantScreen() {
       );
     }
 
-    /* Bot message */
+    // =========================
+    // BOT MESSAGE
+    // =========================
 
     return (
       <View style={styles.botRow}>
@@ -285,7 +325,9 @@ export default function AssistantScreen() {
           />
         </View>
 
-        <View style={styles.botMessageContainer}>
+        <View
+          style={styles.botMessageContainer}
+        >
           <Text style={styles.botName}>
             Alkhidmat AI
           </Text>
@@ -302,11 +344,13 @@ export default function AssistantScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* =================================
-          HEADER
-      ================================= */}
+
+      {/* =====================================
+          TOP HEADER
+      ====================================== */}
 
       <View style={styles.header}>
+
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -320,6 +364,7 @@ export default function AssistantScreen() {
         </TouchableOpacity>
 
         <View style={styles.headerCenter}>
+
           <View style={styles.headerAvatar}>
             <Ionicons
               name="sparkles"
@@ -327,7 +372,9 @@ export default function AssistantScreen() {
               color={COLORS.white}
             />
 
-            <View style={styles.onlineDot} />
+            <View
+              style={styles.onlineDot}
+            />
           </View>
 
           <View style={styles.headerText}>
@@ -336,25 +383,20 @@ export default function AssistantScreen() {
             </Text>
 
             <View style={styles.onlineRow}>
-              <View style={styles.onlineSmallDot} />
+              <View
+                style={styles.onlineSmallDot}
+              />
 
-              <Text style={styles.headerSubtitle}>
+              <Text
+                style={styles.headerSubtitle}
+              >
                 Online • Ready to help
               </Text>
             </View>
           </View>
+
         </View>
 
-        <TouchableOpacity
-          style={styles.headerAction}
-          activeOpacity={0.75}
-        >
-          <Ionicons
-            name="information-circle-outline"
-            size={20}
-            color={COLORS.blue}
-          />
-        </TouchableOpacity>
       </View>
 
       <KeyboardAvoidingView
@@ -366,19 +408,40 @@ export default function AssistantScreen() {
         }
         keyboardVerticalOffset={80}
       >
+
         <FlatList
           ref={flatListRef}
           data={messages}
           keyExtractor={(item) => item.id}
           renderItem={renderMessage}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.messagesList}
+          contentContainerStyle={
+            styles.messagesList
+          }
+
+          /* =====================================
+             HERO BANNER
+          ====================================== */
+
           ListHeaderComponent={
             <View style={styles.heroCard}>
-              <View style={styles.heroCircleOne} />
-              <View style={styles.heroCircleTwo} />
 
-              <View style={styles.heroTopRow}>
+              <View
+                style={styles.heroCircleOne}
+              />
+
+              <View
+                style={styles.heroCircleTwo}
+              />
+
+              {/* TOP ROW */}
+
+              <View
+                style={styles.heroTopRow}
+              >
+
+                {/* AI ICON */}
+
                 <View style={styles.heroIcon}>
                   <Ionicons
                     name="sparkles"
@@ -387,28 +450,96 @@ export default function AssistantScreen() {
                   />
                 </View>
 
-                <View style={styles.heroBadge}>
-                  <View style={styles.heroOnlineDot} />
-                  <Text style={styles.heroBadgeText}>
-                    AI ACTIVE
-                  </Text>
-                </View>
+                {/* VOLUNTEER DROPDOWN
+                    INSIDE BANNER */}
+
+                <TouchableOpacity
+                  style={styles.profileChip}
+                  activeOpacity={0.85}
+                  onPress={() =>
+                    router.push("/home")
+                  }
+                >
+
+                  <View
+                    style={styles.profileAvatar}
+                  >
+                    <Ionicons
+                      name="person"
+                      size={15}
+                      color={COLORS.blue}
+                    />
+                  </View>
+
+                  <View
+                    style={styles.profileText}
+                  >
+                    <Text
+                      style={styles.profileName}
+                    >
+                      Volunteer
+                    </Text>
+
+                    <Text
+                      style={styles.profileRole}
+                    >
+                      Alkhidmat Volunteer
+                    </Text>
+                  </View>
+
+                  <Ionicons
+                    name="chevron-down"
+                    size={14}
+                    color={COLORS.white}
+                  />
+
+                </TouchableOpacity>
+
+              </View>
+
+              {/* AI ACTIVE BADGE */}
+
+              <View
+                style={styles.heroBadge}
+              >
+
+                <View
+                  style={styles.heroOnlineDot}
+                />
+
+                <Text
+                  style={styles.heroBadgeText}
+                >
+                  AI ACTIVE
+                </Text>
+
               </View>
 
               <Text style={styles.heroTitle}>
                 Your volunteer companion
               </Text>
 
-              <Text style={styles.heroDescription}>
-                Ask me about events, registrations, volunteer
-                opportunities, or certificates.
+              <Text
+                style={styles.heroDescription}
+              >
+                Ask me about events, registrations,
+                volunteer opportunities, or certificates.
               </Text>
+
             </View>
           }
+
+          /* =====================================
+             THINKING INDICATOR
+          ====================================== */
+
           ListFooterComponent={
             isLoading ? (
               <View style={styles.botRow}>
-                <View style={styles.botAvatar}>
+
+                <View
+                  style={styles.botAvatar}
+                >
                   <Ionicons
                     name="sparkles"
                     size={16}
@@ -416,7 +547,12 @@ export default function AssistantScreen() {
                   />
                 </View>
 
-                <View style={styles.botMessageContainer}>
+                <View
+                  style={
+                    styles.botMessageContainer
+                  }
+                >
+
                   <Text style={styles.botName}>
                     Alkhidmat AI
                   </Text>
@@ -427,36 +563,54 @@ export default function AssistantScreen() {
                       styles.typingBubble,
                     ]}
                   >
-                    <View style={styles.typingContent}>
+
+                    <View
+                      style={
+                        styles.typingContent
+                      }
+                    >
+
                       <ActivityIndicator
                         size="small"
                         color={COLORS.blue}
                       />
 
-                      <Text style={styles.typingText}>
+                      <Text
+                        style={styles.typingText}
+                      >
                         Thinking...
                       </Text>
+
                     </View>
+
                   </View>
+
                 </View>
+
               </View>
             ) : null
           }
         />
 
-        {/* =================================
-            INPUT
-        ================================= */}
+        {/* =====================================
+            QUESTION INPUT
+        ====================================== */}
 
         <View style={styles.inputArea}>
-          <View style={styles.inputContainer}>
+
+          <View
+            style={styles.inputContainer}
+          >
+
             <TextInput
               style={styles.input}
-              placeholder="Ask about volunteering..."
+              placeholder="Ask another question..."
               placeholderTextColor="#94A3B8"
               value={inputText}
               onChangeText={setInputText}
-              onSubmitEditing={() => sendMessage()}
+              onSubmitEditing={() =>
+                sendMessage()
+              }
               returnKeyType="send"
               editable={!isLoading}
               multiline
@@ -466,13 +620,17 @@ export default function AssistantScreen() {
             <TouchableOpacity
               style={[
                 styles.sendButton,
-                (!inputText.trim() || isLoading) &&
+                (!inputText.trim() ||
+                  isLoading) &&
                   styles.sendButtonDisabled,
               ]}
-              onPress={() => sendMessage()}
+              onPress={() =>
+                sendMessage()
+              }
               activeOpacity={0.8}
               disabled={
-                !inputText.trim() || isLoading
+                !inputText.trim() ||
+                isLoading
               }
             >
               <Ionicons
@@ -481,28 +639,33 @@ export default function AssistantScreen() {
                 color={COLORS.white}
               />
             </TouchableOpacity>
+
           </View>
 
           <Text style={styles.inputHint}>
-            AI responses may not always be perfect
+            Ask another question anytime
           </Text>
+
         </View>
+
       </KeyboardAvoidingView>
+
     </SafeAreaView>
   );
 }
 
-/* =================================
+/* ============================================
    STYLES
-================================= */
+============================================ */
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
 
-  /* Header */
+  /* HEADER */
 
   header: {
     height: 68,
@@ -583,22 +746,13 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
 
-  headerAction: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: COLORS.blueLight,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  /* Keyboard */
+  /* =====================================
+     MAIN AREA
+  ====================================== */
 
   keyboardContainer: {
     flex: 1,
   },
-
-  /* Messages */
 
   messagesList: {
     paddingHorizontal: 16,
@@ -606,13 +760,15 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 
-  /* Hero */
+  /* =====================================
+     HERO BANNER
+  ====================================== */
 
   heroCard: {
-    minHeight: 190,
+    minHeight: 245,
     backgroundColor: COLORS.navy,
     borderRadius: 25,
-    padding: 20,
+    padding: 19,
     marginBottom: 20,
     overflow: "hidden",
     position: "relative",
@@ -620,23 +776,23 @@ const styles = StyleSheet.create({
 
   heroCircleOne: {
     position: "absolute",
-    width: 175,
-    height: 175,
-    borderRadius: 88,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
     backgroundColor: COLORS.blue,
     opacity: 0.18,
-    right: -65,
-    top: -70,
+    right: -70,
+    top: -75,
   },
 
   heroCircleTwo: {
     position: "absolute",
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: "#E8C56A",
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: COLORS.gold,
     opacity: 0.1,
-    left: -40,
+    left: -45,
     bottom: -55,
   },
 
@@ -655,13 +811,64 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
+  /* =====================================
+     VOLUNTEER CHIP INSIDE BANNER
+  ====================================== */
+
+  profileChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.13)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+    borderRadius: 15,
+    paddingHorizontal: 7,
+    paddingVertical: 6,
+    maxWidth: 155,
+  },
+
+  profileAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 6,
+  },
+
+  profileText: {
+    flex: 1,
+    justifyContent: "center",
+    marginRight: 5,
+  },
+
+  profileName: {
+    fontSize: 9.5,
+    fontWeight: "800",
+    color: COLORS.white,
+  },
+
+  profileRole: {
+    fontSize: 7,
+    fontWeight: "600",
+    color: "#C9D6F1",
+    marginTop: 1,
+  },
+
+  /* =====================================
+     AI ACTIVE
+  ====================================== */
+
   heroBadge: {
+    alignSelf: "flex-start",
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.12)",
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 20,
+    marginTop: 16,
   },
 
   heroOnlineDot: {
@@ -682,7 +889,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: COLORS.white,
-    marginTop: 21,
+    marginTop: 18,
   },
 
   heroDescription: {
@@ -693,7 +900,9 @@ const styles = StyleSheet.create({
     maxWidth: 345,
   },
 
-  /* Bot */
+  /* =====================================
+     BOT
+  ====================================== */
 
   botRow: {
     flexDirection: "row",
@@ -749,7 +958,9 @@ const styles = StyleSheet.create({
     color: COLORS.body,
   },
 
-  /* User */
+  /* =====================================
+     USER
+  ====================================== */
 
   userRow: {
     alignItems: "flex-end",
@@ -771,13 +982,15 @@ const styles = StyleSheet.create({
     color: COLORS.white,
   },
 
-  /* Suggestions */
+  /* =====================================
+     SUGGESTIONS
+  ====================================== */
 
   suggestionCard: {
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    width: "86%",
+    width: "90%",
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: "#D7E2FA",
@@ -805,7 +1018,9 @@ const styles = StyleSheet.create({
     color: COLORS.navy,
   },
 
-  /* Typing */
+  /* =====================================
+     TYPING
+  ====================================== */
 
   typingBubble: {
     paddingVertical: 10,
@@ -822,7 +1037,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
-  /* Input */
+  /* =====================================
+     INPUT
+  ====================================== */
 
   inputArea: {
     backgroundColor: COLORS.white,
@@ -873,5 +1090,5 @@ const styles = StyleSheet.create({
     color: "#A5B0C5",
     textAlign: "center",
     marginTop: 6,
-  }})
-
+  },
+});
