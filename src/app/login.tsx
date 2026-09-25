@@ -6,19 +6,21 @@ import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
+
+import { useAuth } from "../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -38,6 +40,7 @@ type UserData = {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -188,22 +191,15 @@ export default function LoginScreen() {
     }
 
     try {
-      const user: UserData = {
-        id: cleanEmail,
-        name: cleanEmail.split("@")[0] || "Volunteer",
-        email: cleanEmail,
-        provider: "email",
-      };
+      const result = await login(cleanEmail, password);
 
-      await AsyncStorage.setItem(
-        "currentUser",
-        JSON.stringify(user)
-      );
-
-      await AsyncStorage.setItem(
-        "isLoggedIn",
-        "true"
-      );
+      if (!result.success) {
+        Alert.alert(
+          "Login Failed",
+          result.message || "Incorrect email or password."
+        );
+        return;
+      }
 
       router.replace("/home");
     } catch (error) {
@@ -211,7 +207,7 @@ export default function LoginScreen() {
 
       Alert.alert(
         "Login Error",
-        "Unable to save your login session."
+        "Unable to complete your login."
       );
     }
   };
