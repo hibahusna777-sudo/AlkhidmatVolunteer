@@ -498,8 +498,8 @@ const styles = StyleSheet.create({
   },
 
   logoBox: {
-    width: 190,
-    height: 92,
+    width: 60,
+    height: 40,
     borderRadius: 22,
     backgroundColor: "#FFFFFF",
     alignItems: "center",

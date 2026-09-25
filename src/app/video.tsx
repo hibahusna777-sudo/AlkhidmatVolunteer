@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
-    Image,
-    Linking,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const COLORS = {
@@ -115,7 +115,7 @@ export default function VideoScreen() {
 
             <View style={styles.heroBody}>
               <View style={styles.youtubeIcon}>
-                <Ionicons name="logo-youtube" size={26} color="#FFFFFF" />
+                <Ionicons name="logo-youtube" size={26} color="#2e0564" />
               </View>
 
               <View style={{ flex: 1 }}>

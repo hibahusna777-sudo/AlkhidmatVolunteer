@@ -28,9 +28,9 @@ const COLORS = {
 
   background: "#F5F8FF",
   text: "#10244A",
-  muted: "#71809D",
-  lightMuted: "#9AA9C4",
-  border: "#E2E8F5",
+  muted: "#667694",
+  lightMuted: "#8D9BB5",
+  border: "#DCE4F2",
 };
 
 export default function SignupScreen() {
@@ -173,9 +173,7 @@ export default function SignupScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={
-            styles.scrollContent
-          }
+          contentContainerStyle={styles.scrollContent}
         >
           {/* HERO */}
 
@@ -209,7 +207,7 @@ export default function SignupScreen() {
 
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <View>
+              <View style={styles.cardHeaderText}>
                 <Text style={styles.cardTitle}>
                   Create Account
                 </Text>
@@ -233,8 +231,7 @@ export default function SignupScreen() {
             <TouchableOpacity
               style={[
                 styles.googleButton,
-                (!isGoogleReady ||
-                  googleLoading) &&
+                (!isGoogleReady || googleLoading) &&
                   styles.disabledButton,
               ]}
               onPress={promptGoogleSignIn}
@@ -255,6 +252,13 @@ export default function SignupScreen() {
                   : "Continue with Google"}
               </Text>
             </TouchableOpacity>
+
+            {!isGoogleReady && !googleLoading && (
+              <Text style={styles.googleNote}>
+                Google sign-in is currently unavailable
+                in this build.
+              </Text>
+            )}
 
             {/* DIVIDER */}
 
@@ -615,18 +619,19 @@ const styles = StyleSheet.create({
   },
 
   logoBox: {
-    width: 190,
-    height: 82,
-    borderRadius: 20,
+    width: 50,
+    height: 40,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
+    alignSelf: "flex-start",
   },
 
   logo: {
-    width: 170,
-    height: 68,
+    width: 136,
+    height: 52,
   },
 
   heroSmall: {
@@ -641,7 +646,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     lineHeight: 36,
     fontWeight: "900",
-    color: COLORS.white,
+    color: COLORS.royalGold,
   },
 
   goldText: {
@@ -649,7 +654,7 @@ const styles = StyleSheet.create({
   },
 
   heroSubtitle: {
-    color: "#C8D5F0",
+    color: COLORS.white,
     fontSize: 13,
     lineHeight: 20,
     marginTop: 8,
@@ -671,6 +676,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 18,
+  },
+
+  cardHeaderText: {
+    flex: 1,
+    paddingRight: 12,
   },
 
   cardTitle: {
@@ -725,6 +735,14 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
     color: COLORS.text,
+  },
+
+  googleNote: {
+    fontSize: 10,
+    lineHeight: 15,
+    color: COLORS.muted,
+    textAlign: "center",
+    marginTop: 7,
   },
 
   disabledButton: {
@@ -853,14 +871,14 @@ const styles = StyleSheet.create({
   },
 
   loginLink: {
-    color: COLORS.royalGold,
+    color: COLORS.blueDark,
     fontSize: 12,
     fontWeight: "900",
   },
 
   footer: {
     backgroundColor: COLORS.background,
-    color: "#A2AEC4",
+    color: "#71809D",
     textAlign: "center",
     fontSize: 9,
     paddingBottom: 5,
