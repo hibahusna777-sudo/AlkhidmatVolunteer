@@ -2,17 +2,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
@@ -65,6 +65,7 @@ export default function SignupScreen() {
     useState(false);
 
   const handleSignup = async () => {
+    console.log("DEBUG handleSignup entered");
     const cleanName = fullName.trim();
     const cleanEmail = email.trim().toLowerCase();
     const cleanPhone = phone.trim();
@@ -121,6 +122,7 @@ export default function SignupScreen() {
     try {
       setIsSubmitting(true);
 
+      console.log("DEBUG calling AuthContext signup");
       const result = await signup({
         fullName: cleanName,
         email: cleanEmail,
@@ -129,6 +131,7 @@ export default function SignupScreen() {
         role,
         password,
       });
+      console.log("DEBUG signup result returned", result);
 
       if (!result.success) {
         Alert.alert(
@@ -138,6 +141,7 @@ export default function SignupScreen() {
         return;
       }
 
+      console.log("DEBUG before router.replace('/home')");
       Alert.alert(
         "Account Created",
         `Welcome, ${cleanName}! Your ${role} account has been created.`,
@@ -548,9 +552,12 @@ export default function SignupScreen() {
                 isSubmitting &&
                   styles.signupButtonDisabled,
               ]}
-              onPress={handleSignup}
+              onPress={() => {
+                console.log("DEBUG signup button pressed");
+                handleSignup();
+              }}
               activeOpacity={0.85}
-              disabled={isSubmitting}
+              disabled={false}
             >
               <Text style={styles.signupButtonText}>
                 {isSubmitting
