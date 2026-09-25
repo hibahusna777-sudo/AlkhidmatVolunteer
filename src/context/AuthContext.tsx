@@ -1,9 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 
 /*
@@ -37,28 +37,72 @@ interface StoredAccount extends User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  signup: (account: StoredAccount) => Promise<{ success: boolean; message?: string }>;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  loginWithGoogleProfile: (googleUser: { name: string; email: string }) => Promise<void>;
+  signup: (
+    account: StoredAccount,
+  ) => Promise<{ success: boolean; message?: string }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; message?: string }>;
+  loginWithGoogleProfile: (googleUser: {
+    name: string;
+    email: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (updates: Partial<User>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const ACCOUNTS_KEY = "alkhidmat_accounts";
-const SESSION_KEY = "alkhidmat_session";
+const CURRENT_USER_KEY = "currentUser";
+const LEGACY_SESSION_KEY = "alkhidmat_session";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const saveSession = async (sessionUser: User) => {
+    await AsyncStorage.setItem(
+      CURRENT_USER_KEY,
+      JSON.stringify(sessionUser),
+    );
+    setUser(sessionUser);
+  };
+
+  const clearSession = async () => {
+    await AsyncStorage.removeItem(CURRENT_USER_KEY);
+    await AsyncStorage.removeItem(LEGACY_SESSION_KEY);
+    setUser(null);
+  };
+
   // Restore session when the app opens
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const savedSession = await AsyncStorage.getItem(SESSION_KEY);
-        if (savedSession) {
-          setUser(JSON.parse(savedSession));
+        const currentUser = await AsyncStorage.getItem(CURRENT_USER_KEY);
+
+        if (currentUser) {
+          setUser(JSON.parse(currentUser));
+          return;
+        }
+
+        // Migrate the old session key to the canonical currentUser key.
+        const legacySession = await AsyncStorage.getItem(
+          LEGACY_SESSION_KEY,
+        );
+
+        if (legacySession) {
+          const parsedSession: User = JSON.parse(legacySession);
+
+          await AsyncStorage.setItem(
+            CURRENT_USER_KEY,
+            JSON.stringify(parsedSession),
+          );
+
+          await AsyncStorage.removeItem(LEGACY_SESSION_KEY);
+
+          setUser(parsedSession);
         }
       } catch (error) {
         console.log("Failed to restore session:", error);
@@ -93,11 +137,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const updatedAccounts = [...accounts, account];
-    await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(updatedAccounts));
 
-    const { password, ...publicUser } = account;
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(publicUser));
-    setUser(publicUser);
+    await AsyncStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify(updatedAccounts),
+    );
+
+    const { password: _password, ...publicUser } = account;
+
+    await saveSession(publicUser);
 
     return { success: true };
   };
@@ -121,9 +169,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    const { password: _unused, ...publicUser } = match;
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(publicUser));
-    setUser(publicUser);
+    const { password: _password, ...publicUser } = match;
+
+    await saveSession(publicUser);
 
     return { success: true };
   };
@@ -135,7 +183,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const accounts = await getAccounts();
 
     const existing = accounts.find(
-      (account) => account.email.toLowerCase() === googleUser.email.toLowerCase(),
+      (account) =>
+        account.email.toLowerCase() === googleUser.email.toLowerCase(),
     );
 
     const publicUser: User = existing
@@ -154,28 +203,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: "volunteer",
         };
 
-    // If this Google account has never signed up before, save it
-    // as a real account too (no password needed for Google users).
     if (!existing) {
       const updatedAccounts = [
         ...accounts,
-        { ...publicUser, password: "" },
+        {
+          ...publicUser,
+          password: "",
+        },
       ];
-      await AsyncStorage.setItem(ACCOUNTS_KEY, JSON.stringify(updatedAccounts));
+
+      await AsyncStorage.setItem(
+        ACCOUNTS_KEY,
+        JSON.stringify(updatedAccounts),
+      );
     }
 
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(publicUser));
-    setUser(publicUser);
+    await saveSession(publicUser);
+  };
+
+  const updateProfile = async (updates: Partial<User>) => {
+    if (!user) {
+      return;
+    }
+
+    const updatedUser: User = {
+      ...user,
+      ...updates,
+    };
+
+    await saveSession(updatedUser);
+
+    const accounts = await getAccounts();
+
+    const updatedAccounts = accounts.map((account) => {
+      if (
+        account.email.toLowerCase() === updatedUser.email.toLowerCase()
+      ) {
+        return {
+          ...account,
+          ...updates,
+        };
+      }
+
+      return account;
+    });
+
+    await AsyncStorage.setItem(
+      ACCOUNTS_KEY,
+      JSON.stringify(updatedAccounts),
+    );
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem(SESSION_KEY);
-    setUser(null);
+    await clearSession();
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, signup, login, loginWithGoogleProfile, logout }}
+      value={{
+        user,
+        isLoading,
+        signup,
+        login,
+        loginWithGoogleProfile,
+        logout,
+        updateProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -184,8 +277,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 }
