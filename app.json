@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "scheme": "alkhidmatvolunteer",
     "userInterfaceStyle": "automatic",
+
     "ios": {},
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
@@ -14,9 +16,11 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.alkhidmat.volunteer"
     },
+
     "web": {
       "output": "static"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -30,17 +34,19 @@
       "expo-sharing",
       "expo-web-browser"
     ],
+
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true,
-      "baseUrl": "/AlkhidmatVolunteer"
+      "reactCompiler": true
     },
+
     "extra": {
       "router": {},
       "eas": {
         "projectId": "cb19b74a-aa8f-4683-8021-0dc64672a9a0"
       }
     },
+
     "owner": "daniyal771"
   }
 }
