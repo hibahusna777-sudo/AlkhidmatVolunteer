@@ -138,6 +138,11 @@ export default function SignupScreen() {
         return;
       }
 
+      if (Platform.OS === "web") {
+        router.replace("/home");
+        return;
+      }
+
       Alert.alert(
         "Account Created",
         `Welcome, ${cleanName}! Your ${role} account has been created.`,
