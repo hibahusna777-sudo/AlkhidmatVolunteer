@@ -20,15 +20,15 @@ import {
     View,
 } from "react-native";
 
+import {
+    GOOGLE_ANDROID_CLIENT_ID,
+    GOOGLE_IOS_CLIENT_ID,
+    GOOGLE_WEB_CLIENT_ID,
+    getGoogleRedirectUri,
+} from "../constants/google-auth";
 import { useAuth } from "../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
-
-const GOOGLE_WEB_CLIENT_ID =
-  "758307128837-d6mvtq49fjjfk28koi78t2ndaostf9gj.apps.googleusercontent.com";
-
-const GOOGLE_REDIRECT_URI =
-  "https://hibahusna777-sudo.github.io/AlkhidmatVolunteer/";
 
 type UserData = {
   id: string;
@@ -49,7 +49,7 @@ export default function LoginScreen() {
 
   const redirectUri = useMemo(() => {
     if (Platform.OS === "web") {
-      return GOOGLE_REDIRECT_URI;
+      return getGoogleRedirectUri();
     }
 
     return makeRedirectUri({
@@ -60,8 +60,18 @@ export default function LoginScreen() {
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
+    androidClientId:
+      GOOGLE_ANDROID_CLIENT_ID ?? GOOGLE_WEB_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID ?? GOOGLE_WEB_CLIENT_ID,
     redirectUri,
+    selectAccount: true,
   });
+
+  const hasPlatformClientId =
+    Platform.OS === "web" ||
+    (Platform.OS === "android"
+      ? Boolean(GOOGLE_ANDROID_CLIENT_ID)
+      : Boolean(GOOGLE_IOS_CLIENT_ID));
 
   // GOOGLE AUTH RESPONSE
   useEffect(() => {
@@ -214,6 +224,14 @@ export default function LoginScreen() {
 
   // GOOGLE LOGIN
   const handleGoogleSignIn = async () => {
+    if (!hasPlatformClientId) {
+      Alert.alert(
+        "Google Sign-In Setup Required",
+        `Add an ${Platform.OS === "android" ? "Android" : "iOS"} OAuth client ID before using Google Sign-In in this build.`
+      );
+      return;
+    }
+
     if (!request) {
       Alert.alert(
         "Please Wait",
@@ -409,11 +427,11 @@ export default function LoginScreen() {
 
             <Pressable
               onPress={handleGoogleSignIn}
-              disabled={googleLoading}
+              disabled={googleLoading || !hasPlatformClientId}
               style={({ pressed }) => [
                 styles.googleAction,
                 pressed && styles.pressed,
-                googleLoading && styles.disabled,
+                (googleLoading || !hasPlatformClientId) && styles.disabled,
               ]}
             >
               {googleLoading ? (

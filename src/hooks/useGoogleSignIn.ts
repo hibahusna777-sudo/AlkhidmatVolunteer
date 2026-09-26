@@ -1,15 +1,28 @@
+import { makeRedirectUri } from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useEffect, useState } from "react";
-import { Alert } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, Platform } from "react-native";
 
+import {
+    GOOGLE_ANDROID_CLIENT_ID,
+    GOOGLE_IOS_CLIENT_ID,
+    GOOGLE_WEB_CLIENT_ID,
+    getGoogleRedirectUri,
+} from "../constants/google-auth";
 import { useAuth } from "../context/AuthContext";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const GOOGLE_WEB_CLIENT_ID =
-  "758307128837-d6mvtq49fjjfk28koi78t2ndaostf9gj.apps.googleusercontent.com";
+const showGoogleAlert = (title: string, message: string) => {
+  if (Platform.OS === "web") {
+    globalThis.alert(`${title}\n\n${message}`);
+    return;
+  }
+
+  Alert.alert(title, message);
+};
 
 export default function useGoogleSignIn() {
   const router = useRouter();
@@ -17,9 +30,31 @@ export default function useGoogleSignIn() {
 
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  const redirectUri = useMemo(
+    () =>
+      Platform.OS === "web"
+        ? getGoogleRedirectUri()
+        : makeRedirectUri({
+            scheme: "alkhidmatvolunteer",
+            path: "oauthredirect",
+          }),
+    []
+  );
+
+  const hasPlatformClientId =
+    Platform.OS === "web" ||
+    (Platform.OS === "android"
+      ? Boolean(GOOGLE_ANDROID_CLIENT_ID)
+      : Boolean(GOOGLE_IOS_CLIENT_ID));
+
   const [request, response, promptAsync] =
     Google.useAuthRequest({
       webClientId: GOOGLE_WEB_CLIENT_ID,
+      androidClientId:
+        GOOGLE_ANDROID_CLIENT_ID ?? GOOGLE_WEB_CLIENT_ID,
+      iosClientId: GOOGLE_IOS_CLIENT_ID ?? GOOGLE_WEB_CLIENT_ID,
+      redirectUri,
+      selectAccount: true,
     });
 
   useEffect(() => {
@@ -39,9 +74,10 @@ export default function useGoogleSignIn() {
       if (response.type === "error") {
         setGoogleLoading(false);
 
-        Alert.alert(
+        showGoogleAlert(
           "Google Sign-In",
-          "Google Sign-In could not be completed. Please try again."
+          response.error?.message ||
+            "Google Sign-In could not be completed. Please try again."
         );
 
         return;
@@ -108,7 +144,7 @@ export default function useGoogleSignIn() {
           error
         );
 
-        Alert.alert(
+        showGoogleAlert(
           "Google Sign-In Failed",
           "Google account information could not be saved. Please try again."
         );
@@ -121,8 +157,16 @@ export default function useGoogleSignIn() {
   }, [response, loginWithGoogleProfile, router]);
 
   const promptGoogleSignIn = async () => {
+    if (!hasPlatformClientId) {
+      showGoogleAlert(
+        "Google Sign-In Setup Required",
+        `Add an ${Platform.OS === "android" ? "Android" : "iOS"} OAuth client ID before using Google Sign-In in this build.`
+      );
+      return;
+    }
+
     if (!request) {
-      Alert.alert(
+      showGoogleAlert(
         "Please Wait",
         "Google Sign-In is still preparing. Please try again."
       );
@@ -140,7 +184,7 @@ export default function useGoogleSignIn() {
 
       setGoogleLoading(false);
 
-      Alert.alert(
+      showGoogleAlert(
         "Google Sign-In",
         "Google Sign-In could not be opened. Please try again."
       );
@@ -150,6 +194,6 @@ export default function useGoogleSignIn() {
   return {
     promptGoogleSignIn,
     googleLoading,
-    isGoogleReady: !!request,
+    isGoogleReady: !!request && hasPlatformClientId,
   };
 }
